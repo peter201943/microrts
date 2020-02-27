@@ -42,7 +42,7 @@
 ### My Initial Agent Design
 ![Agent Design](AgentDesign.png)
 
-### `Light Rush`
+### An Example Agent
 [`Light Rush`](src/ai/abstraction/LightRush.java)
 
 
@@ -154,5 +154,171 @@ doAttack(X,Y) :- own(X),idleLight(X),enemy(Y),~type(Y,"Resource").
 ```yaml
 doAttack("Light") :- idle.
 name ("target") :- condition .
-RuleName accepts "TargetName" PredicatedOn Condition EndOfLine 
+RuleName accepts "TargetName" PredicatedOn Condition EndOfLine
 ```
+```yaml
+if lightUnits
+    if lightUnits.idle
+        lightUnits.attack
+```
+```yaml
+idle(light) = attack(light)
+```
+
+### Lang Spec 0
+```yaml
+# Lexicon Imports
+idle    = Idle.java
+have    = Have.java
+no      = No.java
+afford  = Afford.java
+=       = Check.java
+:       = Do.java
+
+# Command Imports
+lightAttack     = Attack.java
+firstBarracks   = Barracks.java
+gatherResources = Gather.java
+firstWorker     = TrainWorker.java
+lightRush       = LightRush.java
+
+# Unit Imports
+units       = Agent.units
+lights      = Agent.units.lightUnits
+workers     = Agent.units.workers
+bases       = Agent.units.bases
+barracks    = Agent.units.barracks
+
+# Behaviors
+rules:
+    units:
+        lights:
+            lightAttack     = idle # 6
+        workers:
+            firstBase       = idle, have no base, have worker, afford base # 2
+            firstBarracks   = idle, have no barracks, afford barracks, have base, have worker # 3
+            gatherResources = idle, have base # 4
+        bases:
+            firstWorker     = idle, have base, have no workers, afford worker # 1
+        barracks:
+            lightRush       = idle, afford light # 5
+
+# Facts
+facts:
+    units:
+        lights:
+            have    = true
+            afford  = false
+            idle    = none
+        workers:
+            have    = false
+            afford  = true
+            idle    = [unit1]
+        bases:
+            have    = true
+            afford  = false
+            idle    = none
+        barracks:
+            have    = false
+            afford  = false
+            idle    = none
+```
+```yaml
+# Per Action Full Name Listing
+rules.units.lights.lightAttack      = idle # 6
+
+rules.units.workers.firstBase       = idle, have no base, have worker, afford base # 2
+rules.units.workers.firstBarracks   = idle, have no barracks, afford barracks, have base, have worker # 3
+rules.units.workers.gatherResources = idle, have base # 4
+
+rules.units.bases.firstWorker       = idle, have base, have no workers, afford worker # 1
+
+rules.units.barracks.lightRush      = idle, afford light # 5
+
+# Per Fact Full Name Listing
+facts.units.lights.have     = true
+facts.units.lights.afford   = false
+facts.units.lights.idle     = none
+
+facts.units.workers.have    = false
+facts.units.workers.afford  = true
+facts.units.workers.idle    = [unit1]
+
+facts.units.bases.have      = true
+facts.units.bases.afford    = false
+facts.units.bases.idle      = none
+
+facts.units.barracks.have   = false
+facts.units.barracks.afford = false
+facts.units.barracks.idle   = none
+```
+```yaml
+rule:
+    lightAttack = we own lights
+
+fact:
+    we own lights = True
+```
+```yaml
+doTrainWorker("Base") :- idle, own("Base"),~own("Worker"),enoughResourcesFor("Worker"). # 1
+doBuildBase("Worker") :- idle, own("Worker"),~own("Base"),enoughResourcesFor("Base"). # 2
+doBuildBarracks("Worker") :- idle, own("Worker"),own("Base"),~own("Barracks"),enoughResourcesFor("Barracks"). # 3
+doHarvest("Worker") :- idle, own("Base"). # 4
+doTrainLight("Barracks") :- idle, enoughResourcesFor("Light"). # 5
+doAttack("Light") :- idle. # 6
+```
+
+### Lang Spec 1
+```yaml
+fact syntax:
+    rule:
+    #comment
+    action!
+    condition?
+    link
+    shortname
+    long name
+
+fact types:
+    subjects
+    states
+    sugar
+
+fact subjects:
+    they
+    we
+
+fact states:
+    own
+    not
+
+fact sugar:
+    do
+    the
+    a
+    is
+    if
+```
+```yaml
+fact agent:
+    if they own a base:
+        attack!
+
+light unit:
+    if idle: attack!
+
+attack:
+    light units attack!
+```
+
+### Lang Spec 2
+```yaml
+
+```
+
+
+---------
+
+
+
+

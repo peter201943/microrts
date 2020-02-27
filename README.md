@@ -50,49 +50,9 @@ $ tree
 
 ## Agent
 
-### Background
+### Design
 ```yaml
-fact syntax:
-    rule:
-    #comment
-    action!
-    condition?
-    link
-    shortname
-    long name
-
-fact types:
-    subjects
-    states
-    sugar
-
-fact subjects:
-    they
-    we
-
-fact states:
-    own
-    not
-
-fact sugar:
-    do
-    the
-    a
-    is
-    if
-```
-
-### Actual
-```yaml
-fact agent:
-    if they own a base:
-        attack!
-
-light unit:
-    if idle: attack!
-
-attack:
-    light units attack!
+...
 ```
 
 
