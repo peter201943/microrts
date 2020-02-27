@@ -54,47 +54,47 @@
 ### Simple Example
 ```yaml
 # Rule set:
-# If we have any "light": send it to attack to the nearest enemy unit
-# If we have a base: train worker until we have 1 workers
-# If we have a barracks: train light
-# If we have a worker: do this if needed: build base, build barracks, harvest resources
+# If we have any "light":   send it to attack to the nearest enemy unit
+# If we have a base:        train worker until we have 1 workers
+# If we have a barracks:    train light
+# If we have a worker:      do this if needed: build base, build barracks, harvest resources
 
 # Notes:
 # - Actions are of the form doXXX(UnitType)
 #
 # Actions that can be performed:
-# - doTrainWorker: trains a worker
-# - doTrainLight: trains a light unit
-# - doBuildBase: builds a base in a nearby position
-# - doBuildBarracks: builds a barracks in a nearby position
-# - doHarvest: sends a worker to harvest resources from a resource mine
-# - doAttack: attacks a nearby enemy
+# - doTrainWorker:      trains a worker
+# - doTrainLight:       trains a light unit
+# - doBuildBase:        builds a base in a nearby position
+# - doBuildBarracks:    builds a barracks in a nearby position
+# - doHarvest:          sends a worker to harvest resources from a resource mine
+# - doAttack:           attacks a nearby enemy
 #
 # Predefined predicates that need to be implemented:
-# - idle: whether the unit we are considering is idle
-# - own(UnitType): whether we own any unit of the specified type
-# - enoughResourcesFor(UnitType): whether we have enough resources for the specified unit type
+# - idle:                           whether the unit we are considering is idle
+# - own(UnitType):                  whether we own any unit of the specified type
+# - enoughResourcesFor(UnitType):   whether we have enough resources for the specified unit type
 # - ~ means negation
 #
 # The idea here is:
 # - For each of the units we own try to execute the rules that match the unit type of the unit
 # - If any rule gets triggered, make the unit perform the action corresponding to the rule head
 
-doTrainWorker("Base") :- idle, own("Base"),~own("Worker"),enoughResourcesFor("Worker").
-doBuildBase("Worker") :- idle, own("Worker"),~own("Base"),enoughResourcesFor("Base").
-doBuildBarracks("Worker") :- idle, own("Worker"),own("Base"),~own("Barracks"),enoughResourcesFor("Barracks").
-doHarvest("Worker") :- idle, own("Base").
-doTrainLight("Barracks") :- idle, enoughResourcesFor("Light").
-doAttack("Light") :- idle.
+doTrainWorker("Base")       :- idle, own("Base"),   ~own("Worker"),   enoughResourcesFor("Worker").
+doBuildBase("Worker")       :- idle, own("Worker"), ~own("Base"),     enoughResourcesFor("Base").
+doBuildBarracks("Worker")   :- idle, own("Worker"),  own("Base"),    ~own("Barracks"),              enoughResourcesFor("Barracks").
+doHarvest("Worker")         :- idle, own("Base").
+doTrainLight("Barracks")    :- idle, enoughResourcesFor("Light").
+doAttack("Light")           :- idle.
 ```
 
 ### Complex Example
 ```yaml
 # Rule set:
-# If we have any "light": send it to attack to the nearest enemy unit
-# If we have a base: train worker until we have 1 workers
-# If we have a barracks: train light
-# If we have a worker: do this if needed: build base, build barracks, harvest resources
+# If we have any "light":   send it to attack to the nearest enemy unit
+# If we have a base:        train worker until we have 1 workers
+# If we have a barracks:    train light
+# If we have a worker:      do this if needed: build base, build barracks, harvest resources
 
 # Notes:
 # - Generally this uses Prolog syntax
@@ -107,54 +107,54 @@ doAttack("Light") :- idle.
 # - Actions are of the form doXXX(ID): the make the unit with the specified ID perform an action
 #
 # Actions that can be performed:
-# - doTrainWorker: trains a worker
-# - doTrainLight: trains a light unit
-# - doBuildBase: builds a base in a nearby position
-# - doBuildBarracks: builds a barracks in a nearby position
-# - doHarvest: sends a worker to harvest resources from a resource mine
-# - doAttack: attacks a nearby enemy
+# - doTrainWorker:      trains a worker
+# - doTrainLight:       trains a light unit
+# - doBuildBase:        builds a base in a nearby position
+# - doBuildBarracks:    builds a barracks in a nearby position
+# - doHarvest:          sends a worker to harvest resources from a resource mine
+# - doAttack:           attacks a nearby enemy
 #
 # Predefined predicates that need to be implemented:
-# - idle(ID): whether the unit specified by ID is idle (if ID is unbound, ID will be bound to each of the idle units, one at a time, Prolog-style)
-# - own(ID): whether we own the unit with the specified ID  (if ID is unbound, ID will be bound to each of the units we own, one at a time)
-# - enemy(ID): same as "own(ID)", but for enemy units.
-# - resourcesAvailable(X): binds X to the number of resources we have
+# - idle(ID):                       whether the unit specified by ID is idle (if ID is unbound, ID will be bound to each of the idle units, one at a time, Prolog-style)
+# - own(ID):                        whether we own the unit with the specified ID  (if ID is unbound, ID will be bound to each of the units we own, one at a time)
+# - enemy(ID):                      same as "own(ID)", but for enemy units.
+# - resourcesAvailable(X):          binds X to the number of resources we have
 # - resourcesNeededFor(UnitType,Y): binds Y to the number of resources needed to train UnitType
-# - type(X,UnitType): true if the unit type of X is UnitType
+# - type(X,UnitType):               true if the unit type of X is UnitType
 # - ~ means negation
 #
 # The idea here is:
 # - At each game frame, check one rule at a time, and for each rule which is satisfied, send the corresponding command to the corresponding units.
 
 # auxiliary predicates:
-ownBase(X) :- type(X,"Base"),own(X).
-ownWorker(X) :- type(X,"Worker"),own(X).
-ownBarrack(X) :- type(X,"Barracks"),own(X).
-workerNeeded() :- ~ownWorker(X).
+ownBase(X)          :-  type(X,"Base"),      own(X).
+ownWorker(X)        :-  type(X,"Worker"),    own(X).
+ownBarrack(X)       :-  type(X,"Barracks"),  own(X).
+workerNeeded()      :- ~ownWorker(X).
 
 # baseBehavior
-doTrainWorker(Z) :- workerNeeded(),resourcesAvailable(X),resourcesNeededFor("Worker",Y),X>Y,ownBase(Z),idle(Z).
+doTrainWorker(Z)    :-  workerNeeded(),  resourcesAvailable(X),  resourcesNeededFor("Worker",Y),    X>Y,    ownBase(Z), idle(Z).
 
 # workersBehavior
-idleWorker(X) :- type(X,"Worker"),own(X),idle(X).
-doBuildBase(Z) :- ~ownBase(X),resourcesAvailable(X),resourcesNeededFor("Base",Y),X>Y,idleWorker(Z).
-doBuildBarracks(Z) :- ~ownBarrack(X),resourcesAvailable(X),resourcesNeededFor("Barracks",Y),X>Y,idleWorker(Z).
-doHarvest(X,Y,Z) :- own(X),idleWorker(X),type(Y,"Resource"),ownBase(Z).
+idleWorker(X)       :-  type(X,"Worker"),   own(X),                 idle(X).
+doBuildBase(Z)      :- ~ownBase(X),         resourcesAvailable(X),  resourcesNeededFor("Base",Y),       X>Y,    idleWorker(Z).
+doBuildBarracks(Z)  :- ~ownBarrack(X),      resourcesAvailable(X),  resourcesNeededFor("Barracks",Y),   X>Y,    idleWorker(Z).
+doHarvest(X,Y,Z)    :-  own(X),             idleWorker(X),          type(Y,"Resource"),                 ownBase(Z).
 
 # barracksBehavior
-doTrainLight(Z) :- resourcesAvailable(X),resourcesNeededFor("Light",Y),X>Y,ownBarrack(Z),idle(Z).
+doTrainLight(Z)     :-  resourcesAvailable(X),  resourcesNeededFor("Light",Y),  X>Y,    ownBarrack(Z),  idle(Z).
 
 # meleeUnitBehavior
-idleLight(X) :- type(X,"Light"),own(X),idle(X).
-doAttack(X,Y) :- own(X),idleLight(X),enemy(Y),type(Y,"Light").
-doAttack(X,Y) :- own(X),idleLight(X),enemy(Y),~type(Y,"Resource").
+idleLight(X)        :-  type(X,"Light"),    own(X),         idle(X).
+doAttack(X,Y)       :-  own(X),             idleLight(X),   enemy(Y),    type(Y,"Light").
+doAttack(X,Y)       :-  own(X),             idleLight(X),   enemy(Y),   ~type(Y,"Resource").
 ```
 
 ### Representing Attacks
 ```yaml
 doAttack("Light") :- idle.
 name ("target") :- condition .
-RuleName accepts "TargetName" PredicatedOn Condition EndOfLine
+RuleName Accepts "TargetName" PredicatedOn Condition EndOfLine
 ```
 ```yaml
 if lightUnits
@@ -373,9 +373,90 @@ attack:
     light units attack!
 ```
 
-### Lang Spec 2
+### Train Worker Labels
 ```yaml
+doTrainWorker("Base")       :- idle, own("Base"),   ~own("Worker"),  enoughResourcesFor("Worker").                          # 1
+```
+```yaml
+doTrainWorker:
+    subject: Base
+    condition:
+        Base: idle
+        Base: own
+        Worker: not own
+        Worker: afford
+    action: BuildWorker.java
+```
+```yaml
+doTrainWorker:
+    subject: Base
+    condition:
+        idle: Base
+        own: Base
+        not own: Worker
+        afford: Worker
+    action: BuildWorker.java
+```
+```yaml
+doTrainWorker:
+    subject: Base
+    condition: idle: Base,  own: Base,  not own: Worker,  afford: Worker
+    action: BuildWorker.java
+```
 
+### Build Base Tags
+```yaml
+doBuildBarracks("Worker")   :- idle, own("Worker"),  own("Base"),   ~own("Barracks"),   enoughResourcesFor("Barracks").     # 3
+```
+```yaml
+doBuildBarracks:
+    subject: Worker
+    condition: idle: Worker,  have: Worker, Base  have no: Barracks,  afford: Barracks
+    action: BuildBarracks.java
+```
+```yaml
+doBuildBarracks:
+    @Worker
+    +idle
+    +Worker
+    +Base
+    -Barracks
+    $Barracks
+```
+```yaml
+doBuildBarracks:  @Worker  +idle  +Worker  +Base  -Barracks  $Barracks
+```
+
+### Complex Build Base Tags
+```yaml
+doBuildBarracks(Z) :- ~ownBarrack(X),resourcesAvailable(X),resourcesNeededFor("Barracks",Y),X>Y,idleWorker(Z).
+```
+```yaml
+doBuildBarracks:
+    @ Z
+    - X
+    $ X
+    $ Y
+    +Barracks Y
+    +> X Y
+    +idle Z
+```
+
+### Implied Action
+```yaml
+# Behaviors (by Unit)
+rules:
+    units:
+        lights:
+            idle                                                            -> lightAttack      # 6
+        workers:
+            idle, have no base, have worker, afford base                    -> firstBase        # 2
+            idle, have no barracks, afford barracks, have base, have worker -> firstBarracks    # 3
+            idle, have base                                                 -> gatherResources  # 4
+        bases:
+            idle, have base, have no workers, afford worker                 -> firstWorker      # 1
+        barracks:
+            idle, afford light                                              -> lightRush        # 5
 ```
 
 
