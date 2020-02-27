@@ -591,7 +591,8 @@ rules:
 ### Rules
 ```yaml
 word = ""
-type = null
+type = regular
+count = 0
 loop:
     read char
     if char != 'eof':               # end of clauses
@@ -599,15 +600,36 @@ loop:
             if char != '#':         # start of comment
                 if char != " ":     # separator
                     word += char
+                        if char != ":":
+                            if char != "?":
+                                if char != "!":
+                                    continue
+                                else:
+                                    type = action
+                                    add word
+                            else:
+                                type = query
+                                add word
+                        else:
+                            type = container
+                            add word
                 else: # ' '
                     if word != "":
                         add word
+                        type = regular
+                        count + 1
+                    else:
+                        count + 1
+                    if count == 4:
+
             else: # '#'
                 type = comment
         else: # '\n'
-            add word
+            add clause
+            type = regular
     else: # 'eof'
         add word
+        type = regular
         break
 
 add:
@@ -633,6 +655,44 @@ addWord:
         return
     else:
         return
+```
+
+### Cleaner Parsing
+```yaml
+baseFacts:
+ - have:   lights
+ - have:   workers
+ - have:   bases
+ - have:   barracks
+ - afford: lights
+ - afford: workers
+ - afford: bases
+ - afford: barracks
+ - idle:   lights
+ - idle:   workers
+ - idle:   bases
+ - idle:   barracks
+
+derivedFacts:
+    canRush:                idle barracks, afford light
+    canFirstWorker:         idle bases, afford worker
+    needFirstWorker:        have no workers
+    canGatherResources:     idle worker, have base
+    needGatherResources:    have resources
+    canFirstBarracks:       idle worker, afford barracks, have base, have worker
+    needFirstBarracks:      have no barracks
+    canFirstBase:           idle worker, have worker, afford base
+    needFirstBase:          have no base
+    canAttack:              idle lights
+    needAttack:             have enemy
+
+rules:
+ - needAttack?             canAttack?              doAttack!
+ - needFirstBase?          canFirstBase?           doFirstBase!
+ - needFirstBarracks?      canFirstBarracks?       doFirstBarracks!
+ - needGatherResources?    canGatherResources?     doGatherResources!
+ - needFirstWorker?        canFirstWorker?         doFirstWorker!
+ - needAttack?             canRush?                doLightRush!
 ```
 
 
@@ -666,6 +726,10 @@ addWord:
          - How many tasks can be completed with a generic tool?
          - How many tasks require a rake?
              - What mechanisms do we have to rank and sort these things and assign weights?
+ - Also, how to read and parse this stuff?
+     - https://yaml-online-parser.appspot.com/
+     - ick... might not be very clean...
+     - https://stackoverflow.com/questions/22004160/extracting-name-value-pairs-from-json-with-java
 
 
 
