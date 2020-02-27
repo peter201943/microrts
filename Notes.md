@@ -17,11 +17,12 @@
      - Ehsan Khosroshahi
      - eb452
  - **Contents**
-     - [About](#about)          -- What's here
-     - [Links](#links)          -- What else is here
-     - [Learning](#learning)    -- How I got started
-     - [Language](#language)    -- What rules look like
-     - [Parsing](#parsing)      -- Rules for rules
+     - [About](#about)                      -- What's here
+     - [Links](#links)                      -- What else is here
+     - [Learning](#learning)                -- How I got started
+     - [Language](#language)                -- What rules look like
+     - [Parsing](#parsing)                  -- Processing rules
+     - [Considerations](#considerations)    -- Sorting Rules
 
 
 ## Links
@@ -482,7 +483,7 @@ baseFacts:
 
 derivedFacts:
     canRush:
-        idle barracks, afford lights                                                # 5
+        idle barracks, afford light                                                 # 5
     needFirstWorker:
         idle bases, have no workers, afford worker                                  # 1
     canGatherResources:
@@ -504,6 +505,33 @@ rules:
 ```
 #### Number Two
 ```yaml
+objects:
+    enemy
+    enemies
+
+    resource
+    resources
+    
+    light
+    lights
+    
+    worker
+    workers
+    
+    base
+    bases
+    
+    barracks
+    barracks
+
+modifiers:
+    no
+
+states:
+    have
+    afford
+    idle
+
 baseFacts:
     have:
         lights
@@ -523,27 +551,35 @@ baseFacts:
 
 derivedFacts:
     canRush:
-        idle barracks, afford lights                                                # 5
+        idle barracks, afford light                             # 5
     canFirstWorker:
-        idle bases, afford worker                                                   # 1
+        idle bases, afford worker                               # 1
     needFirstWorker:
-        have no workers                                                             # 1
+        have no workers                                         # 1
     canGatherResources:
-        idle worker, have base                                                      # 4
+        idle worker, have base                                  # 4
+    needGatherResources:
+        have resources                                          # 4
+    canFirstBarracks:
+        idle worker, afford barracks, have base, have worker    # 3
     needFirstBarracks:
-        idle worker, have no barracks, afford barracks, have base, have worker      # 3
+        have no barracks                                        # 3
+    canFirstBase:
+        idle worker, have worker, afford base                   # 2
     needFirstBase:
-        idle worker, have no base, have worker, afford base                         # 2
+        have no base                                            # 2
     canAttack:
-        idle lights                                                                 # 6
+        idle lights                                             # 6
+    needAttack:
+        have enemy                                              # 5,6
 
 rules:
-    canAttack?          lightAttack!        # 6
-    needFirstBase?      firstBase!          # 2
-    needFirstBarracks?  firstBarracks!      # 3
-    canGatherResources? gatherResources!    # 4
-    needFirstWorker?    firstWorker!        # 1
-    canRush?            lightRush!          # 5
+    needAttack?             canAttack?              doAttack!           # 6
+    needFirstBase?          canFirstBase?           doFirstBase!        # 2
+    needFirstBarracks?      canFirstBarracks?       doFirstBarracks!    # 3
+    needGatherResources?    canGatherResources?     doGatherResources!  # 4
+    needFirstWorker?        canFirstWorker?         doFirstWorker!      # 1
+    needAttack?             canRush?                doLightRush!        # 5
 ```
 
 
@@ -558,18 +594,18 @@ word = ""
 type = null
 loop:
     read char
-    if char != 'eof':
-        if char != '\n':
-            if char != '#':
-                if char != " ":
+    if char != 'eof':               # end of clauses
+        if char != '\n':            # end of clause
+            if char != '#':         # start of comment
+                if char != " ":     # separator
                     word += char
                 else: # ' '
-                    if word != " ":
+                    if word != "":
                         add word
             else: # '#'
                 type = comment
         else: # '\n'
-            null
+            add word
     else: # 'eof'
         add word
         break
@@ -622,6 +658,14 @@ addWord:
          - with specific subgoals _remove fish_ and _remove leaves_
          - and specific means _rake_ and _tool_
  - Are the _means_ part of the _goal_?
+     - ie, cannot _rake leaves_ without _rake_
+         - hence, part of the goal is _finding a rake_.
+         - _Any tool_ is easier than _any rake_.
+ - So are the goals of equivalent importance?
+     - Depends on the unions of the sets
+         - How many tasks can be completed with a generic tool?
+         - How many tasks require a rake?
+             - What mechanisms do we have to rank and sort these things and assign weights?
 
 
 
