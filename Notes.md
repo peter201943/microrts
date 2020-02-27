@@ -189,68 +189,128 @@ workers     = Agent.units.workers
 bases       = Agent.units.bases
 barracks    = Agent.units.barracks
 
-# Behaviors
+# Behaviors (by Unit)
 rules:
     units:
         lights:
-            lightAttack     = idle # 6
+            lightAttack     = idle                                                              # 6
         workers:
-            firstBase       = idle, have no base, have worker, afford base # 2
-            firstBarracks   = idle, have no barracks, afford barracks, have base, have worker # 3
-            gatherResources = idle, have base # 4
+            firstBase       = idle, have no base, have worker, afford base                      # 2
+            firstBarracks   = idle, have no barracks, afford barracks, have base, have worker   # 3
+            gatherResources = idle, have base                                                   # 4
         bases:
-            firstWorker     = idle, have base, have no workers, afford worker # 1
+            firstWorker     = idle, have base, have no workers, afford worker                   # 1
         barracks:
-            lightRush       = idle, afford light # 5
+            lightRush       = idle, afford light                                                # 5
 
-# Facts
+# Facts (by Unit)
 facts:
     units:
         lights:
             have    = true
-            afford  = false
-            idle    = none
+            afford  = false     # 5
+            idle    = none      # 6
         workers:
-            have    = false
-            afford  = true
-            idle    = [unit1]
+            have    = false     # 1
+            afford  = true      # 1
+            idle    = [unit1]   # 2,3,4
         bases:
-            have    = true
-            afford  = false
-            idle    = none
+            have    = true      # 1,2,3,4
+            afford  = false     # 2
+            idle    = none      # 1
         barracks:
-            have    = false
-            afford  = false
-            idle    = none
+            have    = false     # 3
+            afford  = false     # 3
+            idle    = none      # 5
 ```
+
+### Different Fact Sorts
+```yaml
+# By Subject
+facts:
+    units:
+        lights:
+            have    = true
+            afford  = false     # 5
+            idle    = none      # 6
+        workers:
+            have    = false     # 1
+            afford  = true      # 1
+            idle    = [unit1]   # 2,3,4
+        bases:
+            have    = true      # 1,2,3,4
+            afford  = false     # 2
+            idle    = none      # 1
+        barracks:
+            have    = false     # 3
+            afford  = false     # 3
+            idle    = none      # 5
+
+# By Verb
+facts:
+    have:
+        lights      = true
+        workers     = false     # 1
+        bases       = true      # 1,2,3,4
+        barracks    = false     # 3
+    afford:
+        lights      = false     # 5
+        workers     = true      # 1
+        bases       = false     # 2
+        barracks    = flase     # 3
+    idle:
+        lights      = none      # 6
+        workers     = [unit1]   # 2,3,4
+        bases       = none      # 1
+        barracks    = none      # 5
+
+# By Truth
+facts:
+    true:
+        lights:     have    = true
+        workers:    afford  = true      # 1
+        workers:    idle    = [unit1]   # 2,3,4
+        bases:      have    = true      # 1,2,3,4
+    false:
+        lights:     afford  = false     # 5
+        lights:     idle    = none      # 6
+        workers:    have    = false     # 1
+        bases:      afford  = false     # 2
+        bases:      idle    = none      # 1
+        barracks:   have    = false     # 3
+        barracks:   afford  = false     # 3
+        barracks:   idle    = none      # 5
+```
+
+### Full Names
 ```yaml
 # Per Action Full Name Listing
-rules.units.lights.lightAttack      = idle # 6
+rules.units.lights.lightAttack      = idle                                                              # 6
 
-rules.units.workers.firstBase       = idle, have no base, have worker, afford base # 2
-rules.units.workers.firstBarracks   = idle, have no barracks, afford barracks, have base, have worker # 3
-rules.units.workers.gatherResources = idle, have base # 4
+rules.units.workers.firstBase       = idle, have no base, have worker, afford base                      # 2
+rules.units.workers.firstBarracks   = idle, have no barracks, afford barracks, have base, have worker   # 3
+rules.units.workers.gatherResources = idle, have base                                                   # 4
 
-rules.units.bases.firstWorker       = idle, have base, have no workers, afford worker # 1
+rules.units.bases.firstWorker       = idle, have base, have no workers, afford worker                   # 1
 
-rules.units.barracks.lightRush      = idle, afford light # 5
+rules.units.barracks.lightRush      = idle, afford light                                                # 5
 
 # Per Fact Full Name Listing
 facts.units.lights.have     = true
-facts.units.lights.afford   = false
-facts.units.lights.idle     = none
+facts.units.lights.afford   = false     # 5
+facts.units.lights.idle     = none      # 6
 
-facts.units.workers.have    = false
-facts.units.workers.afford  = true
-facts.units.workers.idle    = [unit1]
+facts.units.workers.have    = false     # 1
+facts.units.workers.afford  = true      # 1
+facts.units.workers.idle    = [unit1]   # 2,3,4
 
-facts.units.bases.have      = true
-facts.units.bases.afford    = false
-facts.units.bases.idle      = none
+facts.units.bases.have      = true      # 1,2,3,4
+facts.units.bases.afford    = false     # 2
+facts.units.bases.idle      = none      # 1
 
-facts.units.barracks.have   = false
-facts.units.barracks.afford = false
-facts.units.barracks.idle   = none
+facts.units.barracks.have   = false     # 3
+facts.units.barracks.afford = false     # 3
+facts.units.barracks.idle   = none      # 5
 ```
 ```yaml
 rule:
@@ -259,13 +319,15 @@ rule:
 fact:
     we own lights = True
 ```
+
+### Original
 ```yaml
-doTrainWorker("Base") :- idle, own("Base"),~own("Worker"),enoughResourcesFor("Worker"). # 1
-doBuildBase("Worker") :- idle, own("Worker"),~own("Base"),enoughResourcesFor("Base"). # 2
-doBuildBarracks("Worker") :- idle, own("Worker"),own("Base"),~own("Barracks"),enoughResourcesFor("Barracks"). # 3
-doHarvest("Worker") :- idle, own("Base"). # 4
-doTrainLight("Barracks") :- idle, enoughResourcesFor("Light"). # 5
-doAttack("Light") :- idle. # 6
+doTrainWorker("Base")       :- idle, own("Base"),   ~own("Worker"),  enoughResourcesFor("Worker").                          # 1
+doBuildBase("Worker")       :- idle, own("Worker"), ~own("Base"),    enoughResourcesFor("Base").                            # 2
+doBuildBarracks("Worker")   :- idle, own("Worker"),  own("Base"),   ~own("Barracks"),   enoughResourcesFor("Barracks").     # 3
+doHarvest("Worker")         :- idle, own("Base").                                                                           # 4
+doTrainLight("Barracks")    :- idle, enoughResourcesFor("Light").                                                           # 5
+doAttack("Light")           :- idle.                                                                                        # 6
 ```
 
 ### Lang Spec 1
