@@ -21,6 +21,7 @@
      - [Links](#links)          -- What else is here
      - [Learning](#learning)    -- How I got started
      - [Language](#language)    -- What rules look like
+     - [Parsing](#parsing)      -- Rules for rules
 
 
 ## Links
@@ -459,9 +460,171 @@ rules:
             idle, afford light                                              -> lightRush        # 5
 ```
 
+### Refined Truth
+#### Number One
+```yaml
+baseFacts:
+    have:
+        lights
+        workers     # 1
+        bases       # 1,2,3,4
+        barracks    # 3
+    afford:
+        lights      # 5
+        workers     # 1
+        bases       # 2
+        barracks    # 3
+    idle:
+        lights      # 6
+        workers     # 2,3,4
+        bases       # 1
+        barracks    # 5
+
+derivedFacts:
+    canRush:
+        idle barracks, afford lights                                                # 5
+    needFirstWorker:
+        idle bases, have no workers, afford worker                                  # 1
+    canGatherResources:
+        idle worker, have base                                                      # 4
+    needFirstBarracks:
+        idle worker, have no barracks, afford barracks, have base, have worker      # 3
+    needFirstBase:
+        idle worker, have no base, have worker, afford base                         # 2
+    canAttack:
+        idle lights                                                                 # 6
+
+rules:
+    canAttack?          lightAttack!        # 6
+    needFirstBase?      firstBase!          # 2
+    needFirstBarracks?  firstBarracks!      # 3
+    canGatherResources? gatherResources!    # 4
+    needFirstWorker?    firstWorker!        # 1
+    canRush?            lightRush!          # 5
+```
+#### Number Two
+```yaml
+baseFacts:
+    have:
+        lights
+        workers     # 1
+        bases       # 1,2,3,4
+        barracks    # 3
+    afford:
+        lights      # 5
+        workers     # 1
+        bases       # 2
+        barracks    # 3
+    idle:
+        lights      # 6
+        workers     # 2,3,4
+        bases       # 1
+        barracks    # 5
+
+derivedFacts:
+    canRush:
+        idle barracks, afford lights                                                # 5
+    canFirstWorker:
+        idle bases, afford worker                                                   # 1
+    needFirstWorker:
+        have no workers                                                             # 1
+    canGatherResources:
+        idle worker, have base                                                      # 4
+    needFirstBarracks:
+        idle worker, have no barracks, afford barracks, have base, have worker      # 3
+    needFirstBase:
+        idle worker, have no base, have worker, afford base                         # 2
+    canAttack:
+        idle lights                                                                 # 6
+
+rules:
+    canAttack?          lightAttack!        # 6
+    needFirstBase?      firstBase!          # 2
+    needFirstBarracks?  firstBarracks!      # 3
+    canGatherResources? gatherResources!    # 4
+    needFirstWorker?    firstWorker!        # 1
+    canRush?            lightRush!          # 5
+```
+
 
 ---------
 
 
+## Parsing
+
+### Rules
+```yaml
+word = ""
+type = null
+loop:
+    read char
+    if char != 'eof':
+        if char != '\n':
+            if char != '#':
+                if char != " ":
+                    word += char
+                else: # ' '
+                    if word != " ":
+                        add word
+            else: # '#'
+                type = comment
+        else: # '\n'
+            null
+    else: # 'eof'
+        add word
+        break
+
+add:
+    addType
+    addWord
+
+addType:
+    if type == comment:
+        return
+    if type == container:
+        return
+    if type == query:
+        return
+    if type == action:
+        return
+    if type == condition:
+        return
+    if type == modifier:
+        return
+
+addWord:
+    if word in list:
+        return
+    else:
+        return
+```
+
+
+---------
+
+
+## Considerations
+
+ - How to mediate interactions between rules?
+     - ie, two rules affect the same unit at the same time, which one do we choose?
+ - Meditation Techniques:
+     - Most Specific First (GOOD)
+     - First Found (OK)
+     - Last Found (OK)
+     - Least Specific (BAD)
+ - How to measure specificity?
+     - How to compare different areas of specificity?
+     - Which specificity do we prefer over other specifics?
+         - ie, is it more important to _PickUpLeaves if RakeEquipped_ over _CleanPoolofFish if ToolEquipped_?
+             - The _Rake_ is more specific than _Tool_, but _Cleaning the Pool of Fish_ is more specific than _Pick up Leaves_.
+ - How do we measure and track importance of entrypoints and endpoints?
+     - ie, _cleaning the yard_ as an overall goal,
+         - with specific subgoals _remove fish_ and _remove leaves_
+         - and specific means _rake_ and _tool_
+ - Are the _means_ part of the _goal_?
+
+
+
+---------
 
 
