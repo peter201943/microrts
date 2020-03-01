@@ -34,6 +34,11 @@ public abstract class Fact
         return state;
     }
 
+    public boolean State()
+    {
+        return this.state;
+    }
+
     /**
      * For diagnostics, returns name and last updated state
      */

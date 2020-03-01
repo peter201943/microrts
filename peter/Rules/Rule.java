@@ -21,6 +21,7 @@ public class Rule
     {
         this.name = name;
         this.state = false;
+        this.conditions = new ArrayList<Fact>();
     }
 
     public String Name()
@@ -33,6 +34,11 @@ public class Rule
         return this.state;
     }
 
+    public void Add(Fact fact)
+    {
+        this.conditions.Add(fact);
+    }
+
     /**
      * Each rule needs to implement its own arbitrary update checks on a knowledgeBase
      */
@@ -40,7 +46,7 @@ public class Rule
     {
         for (Fact fact : conditions)
         {
-            
+            fact.state = knowledgeBase.Find(fact.Name()).State();
         }
         return state;
     }

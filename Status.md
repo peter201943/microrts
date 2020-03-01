@@ -24,8 +24,8 @@
 
 ## Links
  - [README](README.md)      -- Anything I did
- - [Notes](Notes.md)        -- Anything I thought
- - [Status](Status.md)      -- Where I am
+ - [Notes](NOTES.md)        -- Anything I thought
+ - [Status](STATUS.md)      -- Where I am
 
 
 ---------

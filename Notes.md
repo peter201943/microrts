@@ -6,7 +6,7 @@
 ---------
 
 
-# Notes
+# NOTES
 
 
 ## About
@@ -29,8 +29,8 @@
 
 ## Links
  - [README](README.md)      -- Anything I did
- - [Notes](Notes.md)        -- Anything I thought
- - [Status](Status.md)      -- Where I am
+ - [Notes](NOTES.md)        -- Anything I thought
+ - [Status](STATUS.md)      -- Where I am
 
 
 ---------
@@ -783,6 +783,36 @@ doAttack        :- idle("Light").
  - FIX RULEPARSER
  - MAKE FILES
  - Fix how rules/knowledge is transferred - all we need to do on update is revalidate - then pass the KB around
+
+### Data Layout
+ - Facts contain Rules
+   - These rules will be updated whenever a fact is inspected
+   - This will become computationally infeasible with large enough conditions
+   - Another reason why I hate objects
+ - GAME
+   - AGENT
+     - INFERENCE ENGINE
+       - RULES BASE
+         - RULE
+           - KNOWLEDGE BASE
+             - FACT
+             - FACT
+             - FACT
+         - RULE
+           - KNOWLEDGE BASE
+             - FACT
+             - FACT
+             - FACT
+         - RULE
+           - KNOWLEDGE BASE
+             - FACT
+             - FACT
+             - FACT
+         - RULE
+           - KNOWLEDGE BASE
+             - FACT
+             - FACT
+             - FACT
 
 
 ---------
