@@ -23,6 +23,7 @@
      - [Language](#language)                -- What rules look like
      - [Parsing](#parsing)                  -- Processing rules
      - [Considerations](#considerations)    -- Sorting Rules
+     - [New Format](#new-format)            -- Nevermind everything else
 
 
 ## Links
@@ -735,4 +736,28 @@ rules:
 
 ---------
 
+## New Format
 
+### Draft
+```
+import:
+doTrainWorker   = "TrainWorker"
+doBuildBase     = "BuildBase"
+doHarvest       = "Harvest"
+doTrainLight    = "TrainLight"
+doAttack        = "Attack"
+
+assign:
+doTrainWorker   :- idle("Base"),        have("Base"),      ~have("Worker"), afford("Worker").
+doBuildBase     :- idle("Worker"),      have("Worker"),    ~have("Base"),   afford("Base").
+doBuildBarracks :- idle("Worker"),      have("Worker"),     have("Base"),  ~have("Barracks"),   afford("Barracks").
+doHarvest       :- idle("Worker"),      have("Base").
+doTrainLight    :- idle("Barracks"),    afford("Light").
+doAttack        :- idle("Light").
+```
+
+### Questions
+ - How do we indicate negation?
+   - If we only include true facts, do we need to explicitly define negates?
+   - How do we indicate either is ok?
+   - How do we indicate all must be false?
