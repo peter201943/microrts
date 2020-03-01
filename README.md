@@ -39,8 +39,8 @@ $ tree
 └── peter/
     ├── KnowledgeBase.java      // Class                    -- Has Facts, queries and updates Facts
     ├── RulesBase.java          // Class                    -- Has Rules, queries and updates Rules
-    ├── Rule.java               // Class                    -- Adds a Player Action if Conditions are met
-    ├── Fact.java               // Class                    -- Derived from Game State and other Facts
+    ├── Rule.java               // Abstract                 -- Adds a Player Action if Conditions are met
+    ├── Fact.java               // Abstract                 -- Derived from Game State and other Facts
     ├── InferenceEngine.java    // Class                    -- Has KB and RB, queries and updates both to generate Player Actions
     ├── RuleParser.java         // Class                    -- Reads Plaintext Rules and Spawns Rule Objects
     └── RulesBasedAgent.java    // AbstractionLayerAI       -- Has Inference Engine and connect to Game
