@@ -10,6 +10,7 @@
 
 
 ## About
+ - **microRTS Prolog Expert System**
  - **Student**
      - Peter J. Mangelsdorf
      - pjm349
@@ -777,3 +778,9 @@ doAttack        :- idle("Light").
  - Make Rules Dynamic (Add Conditions)
  - Revise whether or not a KB even needs to exist or if Rules should:
    - Be their own independent KB's
+ - FIX RULE
+ - FIX RULEPARSER
+ - MAKE FILES
+
+---------
+
