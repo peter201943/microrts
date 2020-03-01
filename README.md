@@ -43,44 +43,45 @@ $ tree
     ├── Facts/
     │   ├── KnowledgeBase.java      // Class                    -- Has Facts, queries and updates Facts
     │   ├── Fact.java               // Abstract                 -- Derived from Game State and other Facts
-    │   ├── Afford.java             // Fact                     -- 
-    │   ├── Have.java               // Fact                     -- 
-    │   └── Idle.java               // Fact                     -- 
+    │   ├── Afford.java             // Fact                     -- Can we afford this unit?
+    │   ├── Have.java               // Fact                     -- Do we have this unit?
+    │   └── Idle.java               // Fact                     -- Is this unit active?
     ├── Rules/
     │   ├── RulesBase.java          // Class                    -- Has Rules, queries and updates Rules
-    │   └── Rule.java               // Abstract                 -- Adds a Player Action if Conditions are met
+    │   └── Rule.java               // Class                    -- Adds a Player Action if Conditions are met
     ├── Parsers/
     │   ├── RuleParser.java         // Class                    -- Reads Plaintext Rules and Spawns Rule Objects
-    │   ├── ParseRule.java          // Abstract                 -- 
+    │   ├── ParseRule.java          // Abstract                 -- Examines a String and Acts on it
     │   ├── Chars/
-    │   │   ├── Period.java         // ParseRule                -- 
-    │   │   ├── Quote.java          // ParseRule                -- 
-    │   │   ├── Space.java          // ParseRule                -- 
-    │   │   ├── Comma.java          // ParseRule                -- 
-    │   │   ├── Hash.java           // ParseRule                -- 
-    │   │   ├── Squiggle.java       // ParseRule                -- 
-    │   │   ├── RightParen.java     // ParseRule                -- 
-    │   │   └── LeftParen.java      // ParseRule                -- 
+    │   │   ├── Period.java         // ParseRule                -- Statement Separator
+    │   │   ├── Quote.java          // ParseRule                -- Begin or End of Target Specification
+    │   │   ├── Space.java          // ParseRule                -- Word Separator -- ignore if in sequence
+    │   │   ├── Comma.java          // ParseRule                -- Clause Separator
+    │   │   ├── Hash.java           // ParseRule                -- Comment -- ignores until newline
+    │   │   ├── Squiggle.java       // ParseRule                -- Negation -- flips next clause
+        │   ├── Equals.java         // ParseRule                -- Import
+    │   │   ├── RightParen.java     // ParseRule                -- End of Closure -- Target Indication
+    │   │   └── LeftParen.java      // ParseRule                -- Start of Closure -- Target Indication
     │   ├── Words/
-    │   │   ├── SetEqual.java       // ParseRule                -- 
-    │   │   ├── Any.java            // ParseRule                -- 
-    │   │   ├── Base.java           // ParseRule                -- 
-    │   │   ├── Worker.java         // ParseRule                -- 
-    │   │   ├── Barracks.java       // ParseRule                -- 
-    │   │   ├── Light.java          // ParseRule                -- 
-    │   │   ├── Afford.java         // ParseRule                -- 
-    │   │   ├── Have.java           // ParseRule                -- 
-    │   │   └── Idle.java           // ParseRule                -- 
+    │   │   ├── SetEqual.java       // ParseRule                -- Name - Clause Linker
+    │   │   ├── Symbol.java         // ParseRule                -- Rule Name
+    │   │   ├── Base.java           // ParseRule                -- Unit Type `Base`
+    │   │   ├── Worker.java         // ParseRule                -- Unit Type `Worker`
+    │   │   ├── Barracks.java       // ParseRule                -- Unit Type `Barracks`
+    │   │   ├── Light.java          // ParseRule                -- Unit Type `Light`
+    │   │   ├── Afford.java         // ParseRule                -- Condition `Afford`
+    │   │   ├── Have.java           // ParseRule                -- Condition `Have`
+    │   │   └── Idle.java           // ParseRule                -- Condition `Idle`
     │   └── Lines/
-    │       ├── Assign.java         // ParseRule                -- 
-    │       └── Import.java         // ParseRule                -- 
-    └── Behaviors/
-        ├── Behavior.java           // Abstract                 -- 
-        ├── TrainWorker.java        // Behavior                 -- 
-        ├── BuildBase.java          // Behavior                 -- 
-        ├── Harvest.java            // Behavior                 -- 
-        ├── TrainLight.java         // Behavior                 -- 
-        └── Attack.java             // Behavior                 -- 
+    │       ├── Assign.java         // ParseRule                -- Find Rule with Symbol and Add Conditions
+    │       └── Import.java         // ParseRule                -- Create Rule with Symbol and Action
+    └── Actions/
+        ├── Action.java             // Abstract                 -- A PlayerAction for a generic unit
+        ├── TrainWorker.java        // Action                   -- copies `LightRush.workerBehavior`
+        ├── BuildBase.java          // Action                   -- copies `LightRush.baseBehavior`
+        ├── Harvest.java            // Action                   -- copies `LightRush.harvestBehavior`
+        ├── TrainLight.java         // Action                   -- copies `LightRush.barracksBehavior`
+        └── Attack.java             // Action                   -- copies `LightRush.meeleeBehavior`
 ```
 
 
@@ -88,15 +89,13 @@ $ tree
 ## Agent
 
 ### Design
-```yaml
-import:
-doTrainWorker   = "TrainWorker"
-doBuildBase     = "BuildBase"
-doHarvest       = "Harvest"
-doTrainLight    = "TrainLight"
-doAttack        = "Attack"
+```
+doTrainWorker   = "TrainWorker".
+doBuildBase     = "BuildBase".
+doHarvest       = "Harvest".
+doTrainLight    = "TrainLight".
+doAttack        = "Attack".
 
-assign:
 doTrainWorker   :- idle("Base"),        have("Base"),      ~have("Worker"), afford("Worker").
 doBuildBase     :- idle("Worker"),      have("Worker"),    ~have("Base"),   afford("Base").
 doBuildBarracks :- idle("Worker"),      have("Worker"),     have("Base"),  ~have("Barracks"),   afford("Barracks").
@@ -104,5 +103,8 @@ doHarvest       :- idle("Worker"),      have("Base").
 doTrainLight    :- idle("Barracks"),    afford("Light").
 doAttack        :- idle("Light").
 ```
+
+### Addendum
+ - See [Notes](Notes.md) for design choices and why this format was selected.
 
 

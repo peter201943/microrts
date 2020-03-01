@@ -741,11 +741,11 @@ rules:
 ### Draft
 ```
 import:
-doTrainWorker   = "TrainWorker"
-doBuildBase     = "BuildBase"
-doHarvest       = "Harvest"
-doTrainLight    = "TrainLight"
-doAttack        = "Attack"
+doTrainWorker   = "TrainWorker".
+doBuildBase     = "BuildBase".
+doHarvest       = "Harvest".
+doTrainLight    = "TrainLight".
+doAttack        = "Attack".
 
 assign:
 doTrainWorker   :- idle("Base"),        have("Base"),      ~have("Worker"), afford("Worker").
@@ -761,3 +761,19 @@ doAttack        :- idle("Light").
    - If we only include true facts, do we need to explicitly define negates?
    - How do we indicate either is ok?
    - How do we indicate all must be false?
+
+### Motivation
+ - Why not YAML?
+   - No time, and its still the exact same problem.... uuugggghhhhh so many classes
+ - Why the name changes?
+   - To be more readable. `afford` is so much easier to read than `hasEnoughResourcesFor...` -- just, don't do this...
+ - Why is idle explicit?
+   - So that rules are no longer bound to units.
+   - This also makes it easier, as `idle` does not need to  be a special type anymore.
+ - Why the spacing?
+   - Again, readability. If I could, I would make this a `CSV` for even easier readability.
+
+### TODO
+ - Make Rules Dynamic (Add Conditions)
+ - Revise whether or not a KB even needs to exist or if Rules should:
+   - Be their own independent KB's

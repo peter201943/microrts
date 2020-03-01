@@ -8,15 +8,41 @@ import java.util.ArrayList;
  */
 public class RuleParser
 {
+
+
+    // ***********************************
+    // VARIABLES
+    // ***********************************
+
+    // Parsing Variables
     private ArrayList<ParseRule> characterRules;        // `#`, `,`, `.`, `(`, `)`, `"`, `~`, ` `
     private ArrayList<ParseRule> wordRules;             // `:-`, `Worker`, `Base`, `Barracks`, `Light`, `idle`, `own`, `afford`, `*`
     private ArrayList<ParseRule> lineRules;             // structure of words, eg, conditions must follow `:-`
+
+    // Scanning variables
+    char[] fileCharacters;                              // Where we store the file contents
+    int currentPosition;                                // Where we are in the file contents
+
+    // Parsing Variables
+                                                        // Character is implicit/momentary
+    String word;                                        // Word is built up from characters
+    ArrayList<String> line;                             // Line is built up from strings
+
+
+
+    // ***********************************
+    // CLASS BASICS
+    // ***********************************
 
     public RuleParser()
     {
         this.characterRules = new ArrayList<ParseRule>();
         this.wordRules = new ArrayList<ParseRule>();
         this.lineRules = new ArrayList<ParseRule>();
+
+        this.fileCharacters = null;
+        this.word = "";
+        this.line = new ArrayList<String>();
     }
 
     public void AddCharRule(ParseRule charRule)
@@ -34,16 +60,27 @@ public class RuleParser
         this.lineRules.Add(lineRule);
     }
 
+
+
+    // ***********************************
+    // PARSE LOOPS
+    // ***********************************
+
     public void Parse(String fileContents, InferenceEngine inferenceEngine)
     {
-        // Setup variables
-                                                            // Character is implicit/momentary
-        String word;                                        // word is built up from characters
-        ArrayList<String> line = new ArrayList<String>();   // Line is built up from strings
-
         // Convert String into Array
-        char[] fileCharacters = fileContents.toCharArray();
+        fileCharacters = fileContents.toCharArray();
 
+        // Start the Parsing Loop
+        ParseChar(inferenceEngine);
+    }
+
+    /**
+     * Called by individual Parsing Rules.
+     * Until EOF is reached
+     */
+    public void ParseChar(InferenceEngine inferenceEngine)
+    {
         // Get a Char until Space
         for (char fileCharacter : fileCharacters)
         {
@@ -53,27 +90,91 @@ public class RuleParser
                 parseRule.Check(fileCharacter);
             }
 
-            // Check if space
+            // Check if Space
             if (fileCharacter == " ")
             {
-                // Add to Line
-                line.Add(word);
+                EndOfWord();
+                continue;
+            }
 
-                // Check Word Rules
-                for (ParseRule parseRule : wordRules)
-                {
-                    parseRule.Check(word);
-                }                
-
-                // Check Line Rules
-                for (ParseRule parseRule : lineRules)
-                {
-                    parseRule.Check(line);
-                }
-
-                // Clear word
-                word = "";
+            // Check if Hash or Period
+            if ((fileCharacter == "#") || (fileCharacter == "."))
+            {
+                EndOfLine();
+                continue;
             }
         }
+    }
+
+
+
+    // ***********************************
+    // CASES
+    // ***********************************
+
+    private void EndOfWord()
+    {
+        // Add to Line
+        line.Add(word);
+
+        // Check Word Rules
+        for (ParseRule parseRule : wordRules)
+        {
+            parseRule.Check(word);
+        }                
+
+        // Clear word
+        word = "";
+    }
+
+    private void EndOfLine()
+    {
+        // Add to Line
+        line.Add(word);
+
+        // Check Word Rules
+        for (ParseRule parseRule : wordRules)
+        {
+            parseRule.Check(word);
+        }                
+
+        // Check Line Rules
+        for (ParseRule parseRule : lineRules)
+        {
+            parseRule.Check(line);
+        }
+
+        // Clear word
+        word = "";
+
+        // Clear line
+        line = new ArrayList<String>();
+    }
+
+    private void EndOfFile()
+    {
+        // Add to Line
+        line.Add(word);
+
+        // Check Word Rules
+        for (ParseRule parseRule : wordRules)
+        {
+            parseRule.Check(word);
+        }                
+
+        // Check Line Rules
+        for (ParseRule parseRule : lineRules)
+        {
+            parseRule.Check(line);
+        }
+
+        // Clear word
+        word = "";
+
+        // Clear line
+        line = new ArrayList<String>();
+
+        // Clear Current
+        current = 0;
     }
 }

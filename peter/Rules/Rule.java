@@ -6,12 +6,13 @@ import rts.PlayerAction;
 /**
  * Rule examines the KnowledgeBase and updates its state.
  */
-public abstract class Rule
+public class Rule
 {
-    private String name;        // For ease of human management
-                                // NOTE: The lack of time, this is only meant to be a CHECK,
-                                // not a new layer of state (and potentially bugs).
-    private boolean state;      // Last updated state
+    private String name;                // For ease of human management
+                                        // NOTE: The lack of time, this is only meant to be a CHECK,
+                                        // not a new layer of state (and potentially bugs).
+    private boolean state;              // Last updated state
+    private ArrayList<Fact> conditions; // What needs to happen for the rule to activate
     
     /**
      * All rules need a name
@@ -32,7 +33,10 @@ public abstract class Rule
      */
     public boolean Update(KnowledgeBase knowledgeBase)
     {
-        this.state = false;
+        for (Fact fact : conditions)
+        {
+            
+        }
         return state;
     }
 
