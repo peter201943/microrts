@@ -28,6 +28,11 @@ public class Rule
         return this.name;
     }
 
+    public boolean State()
+    {
+        return this.state;
+    }
+
     /**
      * Each rule needs to implement its own arbitrary update checks on a knowledgeBase
      */

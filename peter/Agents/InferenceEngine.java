@@ -9,6 +9,12 @@ import rts.PlayerAction;
  */
 public class InferenceEngine
 {
+
+
+    // *************************************
+    // CLASS BASICS
+    // *************************************
+
     private KnowledgeBase knowledgeBase;
     private RulesBase rulesBase;
     private PlayerAction playerAction;
@@ -17,7 +23,7 @@ public class InferenceEngine
     {
         this.knowledgeBase = new KnowledgeBase();
         this.rulesBase = new RulesBase();
-        playerAction = new PlayerAction();
+        this.playerAction = new PlayerAction();
     }
 
     /**
@@ -25,12 +31,28 @@ public class InferenceEngine
      */
     public PlayerAction Update(GameState gameState)
     {
+        // Update each of the Components
+        this.knowledgeBase.Update(gameState);
+        this.rulesBase.Update(knowledgeBase);
+
+        // Generate the PlayerAction
         playerAction = new PlayerAction();
-        for (Rule rule : this.rulesBase.Update(this.knowledgeBase.Update(gameState)))
+        for (Rule rule : this.rulesBase)
         {
-            playerAction.merge(rule.Action());
+            if (rule.State())
+            {
+                playerAction.merge(rule.Action());
+            }
         }
         return playerAction;
+    }
+
+    /**
+     * If we want to check without recomputing
+     */
+    public PlayerAction Plan()
+    {
+        return this.playerAction;
     }
 
     /**
@@ -44,7 +66,7 @@ public class InferenceEngine
 
 
     // *************************************
-    // Boiler Plate Getters and Setters
+    // BOILER PLATE API
     // *************************************
 
     public void Add(Fact fact)

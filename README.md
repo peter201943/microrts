@@ -27,6 +27,7 @@
 ## Links
  - [README](README.md)      -- Anything I did
  - [Notes](Notes.md)        -- Anything I thought
+ - [Status](Status.md)      -- Where I am
 
 
 ---------
@@ -116,3 +117,4 @@ doAttack        :- idle("Light").
 ---------
 
 
+This Project can be accessed from [Github](https://github.com/peter201943/microrts).

@@ -30,6 +30,7 @@
 ## Links
  - [README](README.md)      -- Anything I did
  - [Notes](Notes.md)        -- Anything I thought
+ - [Status](Status.md)      -- Where I am
 
 
 ---------
@@ -781,6 +782,8 @@ doAttack        :- idle("Light").
  - FIX RULE
  - FIX RULEPARSER
  - MAKE FILES
+ - Fix how rules/knowledge is transferred - all we need to do on update is revalidate - then pass the KB around
+
 
 ---------
 
