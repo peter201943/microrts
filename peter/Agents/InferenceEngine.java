@@ -15,13 +15,11 @@ public class InferenceEngine
     // CLASS BASICS
     // *************************************
 
-    private KnowledgeBase knowledgeBase;
     private RulesBase rulesBase;
     private PlayerAction playerAction;
 
     public InferenceEngine()
     {
-        this.knowledgeBase = new KnowledgeBase();
         this.rulesBase = new RulesBase();
         this.playerAction = new PlayerAction();
     }
@@ -32,18 +30,19 @@ public class InferenceEngine
     public PlayerAction Update(GameState gameState)
     {
         // Update each of the Components
-        this.knowledgeBase.Update(gameState);
-        this.rulesBase.Update(knowledgeBase);
+        this.rulesBase.Update(gameState);
 
         // Generate the PlayerAction
         playerAction = new PlayerAction();
-        for (Rule rule : this.rulesBase)
+        for (Rule rule : rulesBase.Status())
         {
-            if (rule.State())
+            if (rule.Status())
             {
-                playerAction.merge(rule.Action());
+                playerAction.merge(rule.Action().Evaluate());
             }
         }
+
+        // Return Result
         return playerAction;
     }
 
@@ -60,7 +59,7 @@ public class InferenceEngine
      */
     public String toString()
     {
-        return "INFERENCE: \n" + "\n" + this.knowledgeBase.toString() + "\n" + this.rulesBase.toString() + "\n" + this.playerAction.toString() + "\n";
+        return "INFERENCE: \n" + "\n" + this.rulesBase.toString() + "\n" + this.playerAction.toString() + "\n";
     }
 
 
@@ -68,11 +67,6 @@ public class InferenceEngine
     // *************************************
     // BOILER PLATE API
     // *************************************
-
-    public void Add(Fact fact)
-    {
-        this.knowledgeBase.Add(fact);
-    }
 
     public void Add(Rule rule)
     {
@@ -82,16 +76,6 @@ public class InferenceEngine
     public void Remove(Rule rule)
     {
         this.rulesBase.Remove(rule);
-    }
-
-    public void Remove(Fact fact)
-    {
-        this.knowledgeBase.Remove(fact);
-    }
-
-    public Fact FindFact(String factName)
-    {
-        return this.knowledgeBase.Find(factName);
     }
 
     public Rule FindRule(String ruleName)

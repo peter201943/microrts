@@ -9,7 +9,7 @@ import rts.GameState;
 public abstract class Fact
 {
     private String name;        // For ease of human management
-    private boolean state;      // Is the fact valid?
+    private boolean status;     // Is the fact valid?
     private int age;            // How long has this fact been true?
     private int time;           // When was the fact last update?
     
@@ -28,15 +28,10 @@ public abstract class Fact
      */
     public boolean Update(GameState gameState)
     {
-        this.state = false;
+        this.status = false;
         this.time += 1;
         this.age = 0;
-        return state;
-    }
-
-    public boolean State()
-    {
-        return this.state;
+        return this.status;
     }
 
     /**
@@ -45,6 +40,17 @@ public abstract class Fact
     public String toString()
     {
         return "FACT: " + this.name + ": " + String.valueOf(this.state) + " " + "[" + String.valueOf(this.age) + " / " + String.valueOf(this.time) + "]" + "\n";
+    }
+
+    
+
+    // ************************
+    // BOILERPLATE API
+    // ************************
+    
+    public boolean Status()
+    {
+        return this.status;
     }
 
     public String Name()

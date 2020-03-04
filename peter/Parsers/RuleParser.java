@@ -20,13 +20,13 @@ public class RuleParser
     private ArrayList<ParseRule> lineRules;             // structure of words, eg, conditions must follow `:-`
 
     // Scanning variables
-    char[] fileCharacters;                              // Where we store the file contents
-    int currentPosition;                                // Where we are in the file contents
+    public char[] fileCharacters;                       // Where we store the file contents
+    public int currentPosition;                         // Where we are in the file contents
 
     // Parsing Variables
-                                                        // Character is implicit/momentary
-    String word;                                        // Word is built up from characters
-    ArrayList<String> line;                             // Line is built up from strings
+    public String character;                            // From single index
+    public String word;                                 // Word is built up from characters
+    public ArrayList<String> line;                      // Line is built up from strings
 
 
 
@@ -41,6 +41,9 @@ public class RuleParser
         this.lineRules = new ArrayList<ParseRule>();
 
         this.fileCharacters = null;
+        this.current = 0;
+
+        this.character = "";
         this.word = "";
         this.line = new ArrayList<String>();
     }
@@ -81,28 +84,36 @@ public class RuleParser
      */
     public void ParseChar(InferenceEngine inferenceEngine)
     {
-        // Get a Char until Space
-        for (char fileCharacter : fileCharacters)
+        // Read a Character
+        this.character = String.valueOf(this.fileCharacters[current]);
+
+        // Increment Count
+        this.current += 1;
+
+        // End of File Check
+        if (this.current >= this.fileCharacters.length)
         {
-            // Check Char Rules
-            for (ParseRule parseRule : characterRules)
-            {
-                parseRule.Check(fileCharacter);
-            }
+            EndOfFile(inferenceEngine);
+        }
 
-            // Check if Space
-            if (fileCharacter == " ")
-            {
-                EndOfWord();
-                continue;
-            }
+        // Check Char Rules
+        for (ParseRule parseRule : characterRules)
+        {
+            parseRule.Check(fileCharacter, inferenceEngine);
+        }
 
-            // Check if Hash or Period
-            if ((fileCharacter == "#") || (fileCharacter == "."))
-            {
-                EndOfLine();
-                continue;
-            }
+        // Check if Space
+        if (fileCharacter == " ")
+        {
+            EndOfWord(inferenceEngine);
+            continue;
+        }
+
+        // Check if Hash or Period
+        if ((fileCharacter == "#") || (fileCharacter == "."))
+        {
+            EndOfLine(inferenceEngine);
+            continue;
         }
     }
 
@@ -112,7 +123,7 @@ public class RuleParser
     // CASES
     // ***********************************
 
-    private void EndOfWord()
+    private void EndOfWord(InferenceEngine inferenceEngine)
     {
         // Add to Line
         line.Add(word);
@@ -120,14 +131,14 @@ public class RuleParser
         // Check Word Rules
         for (ParseRule parseRule : wordRules)
         {
-            parseRule.Check(word);
+            parseRule.Check(word, inferenceEngine);
         }                
 
         // Clear word
         word = "";
     }
 
-    private void EndOfLine()
+    private void EndOfLine(InferenceEngine inferenceEngine)
     {
         // Add to Line
         line.Add(word);
@@ -135,13 +146,13 @@ public class RuleParser
         // Check Word Rules
         for (ParseRule parseRule : wordRules)
         {
-            parseRule.Check(word);
+            parseRule.Check(word, inferenceEngine);
         }                
 
         // Check Line Rules
         for (ParseRule parseRule : lineRules)
         {
-            parseRule.Check(line);
+            parseRule.Check(line, inferenceEngine);
         }
 
         // Clear word
@@ -151,7 +162,7 @@ public class RuleParser
         line = new ArrayList<String>();
     }
 
-    private void EndOfFile()
+    private void EndOfFile(InferenceEngine inferenceEngine)
     {
         // Add to Line
         line.Add(word);
@@ -159,13 +170,13 @@ public class RuleParser
         // Check Word Rules
         for (ParseRule parseRule : wordRules)
         {
-            parseRule.Check(word);
+            parseRule.Check(word, inferenceEngine);
         }                
 
         // Check Line Rules
         for (ParseRule parseRule : lineRules)
         {
-            parseRule.Check(line);
+            parseRule.Check(line, inferenceEngine);
         }
 
         // Clear word

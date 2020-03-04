@@ -25,19 +25,21 @@ public class RulesBase
      * Returns a temporary rules base of the rules
      * That agents can parse.
      */
-    public RulesBase Update(KnowledgeBase knowledgeBase)
+    public RulesBase Update(GameState gameState)
     {
-        RulesBase results = new RulesBase();
-
         for (Rule rule : this.rules)
         {
-            if (rule.Update(knowledgeBase))
-            {
-                results.Add(rule);
-            }
+            rule.Update(gameState);
         }
+        return this;
+    }
 
-        return results;
+    /**
+     * When we dont want to recompute
+     */
+    public RulesBase Status()
+    {
+        return this;
     }
 
     /**
@@ -46,6 +48,7 @@ public class RulesBase
     public String toString()
     {
         StringBuilder results = new StringBuilder();
+        results.append("RULES BASE: \n");
         for (Rule rule : this.rules)
         {
             results.append(rule.toString());

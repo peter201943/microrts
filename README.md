@@ -49,19 +49,19 @@ $ tree
     ├── Agents/
     │   ├── InferenceEngine.java        // Class                    -- Has KB and RB, queries and updates both to generate Player Actions
     │   └── RulesBasedAgent.java        // AbstractionLayerAI       -- Has Inference Engine and connects to Game
-    │   └── RulesBasedAgentDemo.java    // RulesBasedAgent          -- Hardcoded Example
     ├── Facts/
     │   ├── Afford.java                 // Fact                     -- Can we afford this unit?
     │   ├── Fact.java                   // Abstract                 -- Derived from Game State and other Facts
     │   ├── Have.java                   // Fact                     -- Do we have this unit?
     │   ├── Idle.java                   // Fact                     -- Is this unit active?
-    │   └── KnowledgeBase.java          // Class                    -- Has Facts, queries and updates Facts
+    │   └── Negation.java               // Fact                     -- Decorates another Fact, allows rule to explicitly define false values
     ├── Parsers/
     │   ├── Chars/
     │   │   ├── Comma.java              // ParseRule                -- Clause Separator
     │   │   ├── Equals.java             // ParseRule                -- Import
     │   │   ├── Hash.java               // ParseRule                -- Comment -- ignores until newline
     │   │   ├── LeftParen.java          // ParseRule                -- Start of Closure -- Target Indication
+    │   │   ├── NewLine.java            // ParseRule                -- End of Line
     │   │   ├── Period.java             // ParseRule                -- Statement Separator
     │   │   ├── Quote.java              // ParseRule                -- Begin or End of Target Specification
     │   │   ├── RightParen.java         // ParseRule                -- End of Closure -- Target Indication
@@ -102,9 +102,9 @@ doTrainLight    = "TrainLight".
 doAttack        = "Attack".
 
 # Assigns the above rules these conditions
-doTrainWorker   :- idle("Base"),        have("Base"),      ~have("Worker"), afford("Worker").
-doBuildBase     :- idle("Worker"),      have("Worker"),    ~have("Base"),   afford("Base").
-doBuildBarracks :- idle("Worker"),      have("Worker"),     have("Base"),  ~have("Barracks"),   afford("Barracks").
+doTrainWorker   :- idle("Base"),        have("Base"),      ~have("Worker"),     afford("Worker").
+doBuildBase     :- idle("Worker"),      have("Worker"),    ~have("Base"),       afford("Base").
+doBuildBarracks :- have("Worker"),      have("Base"),      ~have("Barracks"),   afford("Barracks").
 doHarvest       :- idle("Worker"),      have("Base").
 doTrainLight    :- idle("Barracks"),    afford("Light").
 doAttack        :- idle("Light").

@@ -738,18 +738,17 @@ rules:
 
 ---------
 
+
 ## New Format
 
 ### Draft
 ```
-import:
 doTrainWorker   = "TrainWorker".
 doBuildBase     = "BuildBase".
 doHarvest       = "Harvest".
 doTrainLight    = "TrainLight".
 doAttack        = "Attack".
 
-assign:
 doTrainWorker   :- idle("Base"),        have("Base"),      ~have("Worker"), afford("Worker").
 doBuildBase     :- idle("Worker"),      have("Worker"),    ~have("Base"),   afford("Base").
 doBuildBarracks :- idle("Worker"),      have("Worker"),     have("Base"),  ~have("Barracks"),   afford("Barracks").
@@ -790,29 +789,37 @@ doAttack        :- idle("Light").
    - This will become computationally infeasible with large enough conditions
    - Another reason why I hate objects
  - GAME
-   - AGENT
-     - INFERENCE ENGINE
-       - RULES BASE
-         - RULE
-           - KNOWLEDGE BASE
-             - FACT
-             - FACT
-             - FACT
-         - RULE
-           - KNOWLEDGE BASE
-             - FACT
-             - FACT
-             - FACT
-         - RULE
-           - KNOWLEDGE BASE
-             - FACT
-             - FACT
-             - FACT
-         - RULE
-           - KNOWLEDGE BASE
-             - FACT
-             - FACT
-             - FACT
+     - AGENT
+         - INFERENCE ENGINE
+             - RULES BASE
+                 - RULE
+                     - ARRAYLIST
+                         - FACT
+                         - FACT
+                         - FACT
+                 - RULE
+                     - ARRAYLIST
+                         - FACT
+                         - FACT
+                         - FACT
+                 - RULE
+                     - ARRAYLIST
+                         - FACT
+                         - FACT
+                         - FACT
+                 - RULE
+                     - ARRAYLIST
+                         - FACT
+                         - FACT
+                         - FACT
+
+### Parser Behavior
+ - Have `Loop` be a once run that is called by other functions
+ - Have loop control defined by parse rules
+ - Parse rules can call loop
+ - Parse rules can call each other
+ - parse rules hand off control to one another
+ - Trick is not to run every rule ar once -- but to instead have rules for switching between rules
 
 
 ---------

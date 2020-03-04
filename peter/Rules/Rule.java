@@ -11,8 +11,9 @@ public class Rule
     private String name;                // For ease of human management
                                         // NOTE: The lack of time, this is only meant to be a CHECK,
                                         // not a new layer of state (and potentially bugs).
-    private boolean state;              // Last updated state
+    private boolean status;              // Last updated state
     private ArrayList<Fact> conditions; // What needs to happen for the rule to activate
+    private Action action;
     
     /**
      * All rules need a name
@@ -20,8 +21,9 @@ public class Rule
     public Rule(String name)
     {
         this.name = name;
-        this.state = false;
+        this.status = false;
         this.conditions = new ArrayList<Fact>();
+        this.action = new Action();
     }
 
     public String Name()
@@ -29,9 +31,9 @@ public class Rule
         return this.name;
     }
 
-    public boolean State()
+    public boolean Status()
     {
-        return this.state;
+        return this.status;
     }
 
     public void Add(Fact fact)
@@ -39,25 +41,36 @@ public class Rule
         this.conditions.Add(fact);
     }
 
+    public void Set(Action action)
+    {
+        this.action = action;
+    }
+
     /**
      * Each rule needs to implement its own arbitrary update checks on a knowledgeBase
      */
-    public boolean Update(KnowledgeBase knowledgeBase)
+    public boolean Update(GameState gameState)
     {
-        for (Fact fact : conditions)
+        for (Fact fact : this.conditions)
         {
-            fact.state = knowledgeBase.Find(fact.Name()).State();
+            fact.Update(gameState);
+            if (!fact.Status())
+            {
+                self.status = false;
+                return false;
+            }
         }
-        return state;
+        self.status = true;
+        return true;
     }
 
     /**
      * Each rules has a corresponding action to perform when true.
      * Each rules needs to specify what this is.
      */
-    public PlayerAction Action()
+    public Action Action()
     {
-        return new PlayerAction();
+        return this.action;
     }
 
     /**
@@ -65,6 +78,13 @@ public class Rule
      */
     public String toString()
     {
-        return "RULE: " + this.name + ": " + String.valueOf(this.state) + "\n";
+            StringBuilder results = new StringBuilder();
+            results.append("RULE: " + this.name + ": " + String.valueOf(this.status) + "\n");
+            for (Fact fact : this.conditions)
+            {
+                results.append(fact.toString());
+            }
+            results.append("\n");
+            return results.toString();
     }
 }

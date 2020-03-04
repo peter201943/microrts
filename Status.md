@@ -41,43 +41,45 @@
  .              | TrainWorker           | ---
  .              | .                     | .
  Agents         | InferenceEngine       | test
- .              | RulesBasedAgent       | ---
- .              | RulesBasedAgentDemo   | ---
+ .              | RulesBasedAgent       | wip
+ .              | RulesBasedAgentDemo   | DELETED
  .              | .                     | .
  Facts          | Afford                | ---
- .              | Fact                  | wip
+ .              | Fact                  | test
  .              | Have                  | ---
  .              | Idle                  | ---
- .              | KnowledgeBase         | wip
+ .              | Negation              | ---
+ .              | KnowledgeBase         | DELETED
  .              | .                     | .
- Parsers        | ParseRule             | ---
+ Parsers        | ParseRule             | test
  .              | RuleParser            | wip
  .              | .                     | .
- Parsers.Chars  | Comma                 | ---
- .              | Equals                | ---
- .              | Hash                  | ---
- .              | LeftParen             | ---
- .              | Period                | ---
- .              | Quote                 | ---
- .              | RightParen            | ---
- .              | Space                 | ---
- .              | Squiggle              | ---
+ Parsers.Chars  | Comma                 | wip
+ .              | Equals                | wip
+ .              | Hash                  | wip
+ .              | LeftParen             | wip
+ .              | Period                | wip
+ .              | Quote                 | wip
+ .              | RightParen            | wip
+ .              | Space                 | wip
+ .              | Squiggle              | wip
+ .              | NewLine               | wip
  .              | .                     | .
- Parsers.Lines  | Assign                | ---
- .              | Import                | ---
+ Parsers.Lines  | Assign                | wip
+ .              | Import                | wip
  .              | .                     | .
- Parsers.Words  | Afford                | ---
- .              | Barracks              | ---
- .              | Base                  | ---
- .              | Have                  | ---
- .              | Idle                  | ---
- .              | Light                 | ---
- .              | SetEqual              | ---
- .              | Symbol                | ---
- .              | Worker                | ---
+ Parsers.Words  | Afford                | wip
+ .              | Barracks              | wip
+ .              | Base                  | wip
+ .              | Have                  | wip
+ .              | Idle                  | wip
+ .              | Light                 | wip
+ .              | SetEqual              | wip
+ .              | Symbol                | wip
+ .              | Worker                | wip
  .              | .                     | .
- Rules          | Rule                  | wip
- .              | RulesBase             | wip
+ Rules          | Rule                  | test
+ .              | RulesBase             | test
 
 
 ---------
