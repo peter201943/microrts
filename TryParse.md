@@ -1,5 +1,12 @@
 
 
+### Items
+ - [TryParse](TryParse.md)      -- Notes
+ - [TryParse 1](TryParse1.py)   -- 1st iteration
+ - [TryParse 2](TryParse2.py)   -- 2nd iteration
+ - [TryParse 3](TryParse3.py)   -- 3rd iteration
+
+
 ### Dataflow
 ```
 String -> [Char] -> [[Char]]
@@ -7,6 +14,7 @@ String -> [Char] -> [[Char]]
 ```
 "abc" -> ["a" "b" "c"] -> [["a"] ["b" "c"]]
 ```
+
 
 ### References
  - https://stackoverflow.com/questions/9448265/example-parsers-to-learn-how-to-write-them#9448867
@@ -43,6 +51,7 @@ doBuildBase     = "BuildBase"
 doHarvest       = "Harvest"
 doTrainLight    = "TrainLight"
 doAttack        = "Attack"
+doBuildBarracks = "BuildBarracks"
 
 # Assigns the above rules these conditions
 doTrainWorker   :   idle("Base")        have("Base")      ~ have("Worker")  afford("Worker")
@@ -55,6 +64,7 @@ doHarvest       :   idle("Worker")      have("Base")
 doTrainLight    :   idle("Barracks")    afford("Light")
 doAttack        :   idle("Light")
 ```
+
 
 ### New Grammar 1
  - `#`                  -- comment, all characters ignored until end of line
@@ -72,6 +82,7 @@ doAttack        :   idle("Light")
  - `(`                  -- start of condition target
  - `"`                  -- begin/end of target name
 
+
 ### Extra Conditions
 ```yaml
 need("")    # We need this unit
@@ -86,6 +97,7 @@ X,Y,Z       # Relative/Temporary Symbols
 (idleLight : (X = "light") (own X) (idle X))
 ```
 
+
 ### New Grammar Rules 1
  - `#`      -- Read Until `\n`, ignore result
  - `???`    -- Read Until ` `, save result to 'symbols'
@@ -94,6 +106,7 @@ X,Y,Z       # Relative/Temporary Symbols
  - `\n`     -- Stop/Reset/Clear 'Reader Variables'
  - `:`      -- Read Until `\n`, parse result by Reading Until `(`, checking result is not ` `, looking up result in 'conditions', instantiate that condition...
             -- ... Read Until `"`, then Read Until `"`, lookup result in 'units', assign result to condition, assign condition to 'last seen symbol'
+
 
 ### Implied Data Structures
  - `symbols`            -- 
@@ -115,18 +128,17 @@ doBuildBase     = BuildBase
 doHarvest       = Harvest
 doTrainLight    = TrainLight
 doAttack        = Attack
+doBuildBarracks = BuildBarracks
 
 # Assigns the above rules these conditions
 doTrainWorker   :   idle Base       have Base     ~ have Worker     afford Worker
 doBuildBase     :   idle Worker     have Worker   ~ have Base       afford Base
-doBuildBarracks :   impossible
-doBuildBarracks :   
-doBuildBarracks :   have Worker     have Base
-doBuildBarracks : ~ have Barracks   afford Barracks
+doBuildBarracks :   have Worker     have Base     ~ have Barracks   afford Barracks
 doHarvest       :   idle Worker     have Base
 doTrainLight    :   idle Barracks   afford Light
 doAttack        :   idle Light
 ```
+
 
 ### New Grammar 2
  - `#`                  -- Comment
@@ -145,6 +157,7 @@ doAttack        :   idle Light
  - `doTrainWorker`      -- Store to 'Symbols', 'Line Symbol'
  - ` `                  -- Ignore
  - `=`                  -- Read Until `\n`, Read Until `*` in 'Results', 
+
 
 ### Example Parsing
 ```yaml

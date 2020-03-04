@@ -28,6 +28,7 @@
  - [README](README.md)      -- Anything I did
  - [Notes](NOTES.md)        -- Anything I thought
  - [Status](STATUS.md)      -- Where I am
+ - [TryParse](TryPArse.md)  -- How to parse
 
 
 ---------
@@ -91,23 +92,24 @@ $ tree
 ## Agent
 
 ### Design
-```
+```yaml
 # Light Rush Rules Based Agent
 
 # Creates new rules with these actions
-doTrainWorker   = "TrainWorker".
-doBuildBase     = "BuildBase".
-doHarvest       = "Harvest".
-doTrainLight    = "TrainLight".
-doAttack        = "Attack".
+doTrainWorker   = TrainWorker
+doBuildBase     = BuildBase
+doHarvest       = Harvest
+doTrainLight    = TrainLight
+doAttack        = Attack
+doBuildBarracks = BuildBarracks
 
 # Assigns the above rules these conditions
-doTrainWorker   :- idle("Base"),        have("Base"),      ~have("Worker"),     afford("Worker").
-doBuildBase     :- idle("Worker"),      have("Worker"),    ~have("Base"),       afford("Base").
-doBuildBarracks :- have("Worker"),      have("Base"),      ~have("Barracks"),   afford("Barracks").
-doHarvest       :- idle("Worker"),      have("Base").
-doTrainLight    :- idle("Barracks"),    afford("Light").
-doAttack        :- idle("Light").
+doTrainWorker   :   idle Base       have Base     ~ have Worker     afford Worker
+doBuildBase     :   idle Worker     have Worker   ~ have Base       afford Base
+doBuildBarracks :   have Worker     have Base     ~ have Barracks   afford Barracks
+doHarvest       :   idle Worker     have Base
+doTrainLight    :   idle Barracks   afford Light
+doAttack        :   idle Light
 ```
 
 ### Addendum

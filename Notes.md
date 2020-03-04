@@ -31,6 +31,7 @@
  - [README](README.md)      -- Anything I did
  - [Notes](NOTES.md)        -- Anything I thought
  - [Status](STATUS.md)      -- Where I am
+ - [TryParse](TryPArse.md)  -- How to parse
 
 
 ---------
