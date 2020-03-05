@@ -5,6 +5,7 @@
  - [TryParse 1](TryParse1.py)   -- 1st iteration
  - [TryParse 2](TryParse2.py)   -- 2nd iteration
  - [TryParse 3](TryParse3.py)   -- 3rd iteration
+ - [TryParse 4](TryParse4.py)   -- 4th iteration
 
 
 ### Dataflow
@@ -152,28 +153,32 @@ doAttack        :   idle Light
  - `~`                  -- Negation Decorator
 
 ### New Rules 2
- - `#`                  -- Read Until `\n`, Discard 'Results'
+ - `sof`                -- Read Until `eof`, recurse on 'Results'
+ - `#`                  -- Read Until `\n`, Do Nothing with 'Results'
  - `\n`                 -- Reset 'Line Variables'
- - `doTrainWorker`      -- Store to 'Symbols', 'Line Symbol'
+ - `doTrainWorker`      -- Store to 'Symbols' if not present, 'Line Symbol' always
  - ` `                  -- Ignore
- - `=`                  -- Read Until `\n`, Read Until `*` in 'Results', 
+ - `=`                  -- Read Until `\n`, Read Until `*` in 'Results', lookup 'Results` in 'Classes', instantiate new instance of class, assign class to 'Last Seen Symbol'
+ - `:`                  -- Read Until `\n`, then Read Until ` ` in 'Results'
+ - `idle`               -- Read Until `*`, Read Until ` ` in 'Results', lookup 'Results' in 'Conditions', instantiate new instance, Read Until `*`, lookup 'Results' in 'Units', assign to condition
 
 
 ### Example Parsing
 ```yaml
 doBuildBarracks :   have Worker     have Base
 ```
- 1.  `\n` found. Reading Until ` `.
- 2.  `doBuildBarracks` found. Symbol Unseen. `Line Symbol` set. `Symbols` match found.
- 3.  Read Until `*`.
- 4.  `:` found. Read Until `\n`.
- 5.  `   have Worker     have Base` found. Read Until ` `.
- 6.  `have` found. Instantiate new Have.java. Read Until ` `.
- 7.  `Worker` found. Add Target to Instance. Add Instance to Symbol. Read Until ` `.
- 8.  `have` found. Instantiate new Have.java. Read Until ` `.
- 9.  `Base` found. Add Target to Instance. Add Instance to Symbol. Read Until ` `.
- 10. `eol` found. Reading Until `\n`.
- 11. `\n` found. Reading Until ` `.
- 12. `eof` found. Reader Exit.
+ 1.  Reader Entry. Read Until `eof`. Parse 'Results'.
+ 2.  `\n` found. Reading Until ` `.
+ 3.  `doBuildBarracks` found. Symbol Unseen. `Line Symbol` set. `Symbols` match found.
+ 4.  Read Until `*`.
+ 5.  `:` found. Read Until `\n`.
+ 6.  `   have Worker     have Base` found. Read Until ` `.
+ 7.  `have` found. Instantiate new Have.java. Read Until ` `.
+ 8.  `Worker` found. Add Target to Instance. Add Instance to Symbol. Read Until ` `.
+ 9.  `have` found. Instantiate new Have.java. Read Until ` `.
+ 10. `Base` found. Add Target to Instance. Add Instance to Symbol. Read Until ` `.
+ 11. `eol` found. Reading Until `\n`.
+ 12. `\n` found. Reading Until ` `.
+ 13. `eof` found. Reader Exit.
 
 
