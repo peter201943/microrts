@@ -3,6 +3,36 @@
 
 
 
+## Setup
+
+# `plain`, `extra`
+
+plain = True
+extra = False
+debug = True
+
+
+
+
+
+## Class
+class Plan:
+    def __init__(self):
+        self.name = ""
+        self.action = None
+        self.conditions = []
+    def Add(self, condition):
+        self.conditions.append(condition)
+    def __str__(self):
+        text = self.name + "\n\t" + self.action
+        for condition in self.conditions:
+            text += "\n\t\t" + condition
+        return text + "\n"
+
+
+
+
+
 ## Plain String
 # https://stackoverflow.com/questions/10660435/pythonic-way-to-create-a-long-multi-line-string
 
@@ -23,11 +53,12 @@ doBuildBase     :   idle Worker     have Worker   ~ have Base       afford Base
 doBuildBarracks :   have Worker     have Base     ~ have Barracks   afford Barracks
 doHarvest       :   idle Worker     have Base
 doTrainLight    :   idle Barracks   afford Light
-doAttack        :   idle Light"
+doAttack        :   idle Light
 """
 
 print("\n\nplainString")
-print(plainString)
+if plain:
+    print(plainString)
 
 
 
@@ -41,9 +72,11 @@ plainLines = []
 plainLines = plainString.split("\n")
 
 print("\n\nplainLines")
-print(plainLines)
-for line in plainLines:
-    print(line)
+if extra:
+    print(plainLines)
+if plain:
+    for line in plainLines:
+        print(line)
 
 
 
@@ -58,9 +91,11 @@ for line in plainLines:
             codeLines.append(line)
 
 print("\n\ncodeLines")
-print(codeLines)
-for line in codeLines:
-    print(line)
+if extra:
+    print(codeLines)
+if plain:
+    for line in codeLines:
+        print(line)
 
 
 
@@ -76,9 +111,11 @@ for line in codeLines:
         assignments.append(line)
 
 print("\n\nassignments")
-print(assignments)
-for line in assignments:
-    print(line)
+if extra:
+    print(assignments)
+if plain:
+    for line in assignments:
+        print(line)
 
 
 
@@ -92,9 +129,11 @@ for line in codeLines:
         conditions.append(line)
 
 print("\n\nconditions")
-print(conditions)
-for line in conditions:
-    print(line)
+if extra:
+    print(conditions)
+if plain:
+    for line in conditions:
+        print(line)
 
 
 
@@ -108,27 +147,56 @@ for line in conditions:
 # https://stackoverflow.com/questions/1602934/check-if-a-given-key-already-exists-in-a-dictionary
 # https://www.codevscolor.com/python-print-key-value-dictionary/
 
-print("\n\n")
+if debug:
+    print("\n\nDebug")
 
 classes = ["TrainWorker", "BuildBase", "Harvest", "TrainLight", "Attack", "BuildBarracks"]
 symbols = {}
 lastSeen = None
 word = ""
 for line in assignments:
+    if len(word) > 0:
+        if debug:
+            print("LINE word " + word)
+        if word in classes:
+            if debug:
+                print("Found " + word)
+            symbols[lastSeen] = word
+        elif word in symbols:
+            lastSeen = word
+            if debug:
+                print("lastSeen " + word)
+        elif word not in symbols:
+            if debug:
+                print("Adding " + word)
+            symbols[word] = ""
+            lastSeen = word
+        else:
+            print("ERROR")
+    if debug:
+        print("line " + line)
     lastSeen = None
     word = ""
     for char in line:
-        if char != " ":
+        if debug:
+            print("char " + char)
+        if char not in " =\n":
             word += char
         elif char == " ":
             if len(word) > 0:
+                if debug:
+                    print("CHAR word " + word)
                 if word in classes:
-                    print("Found " + word)
+                    if debug:
+                        print("Found " + word)
                     symbols[lastSeen] = word
                 elif word in symbols:
                     lastSeen = word
+                    if debug:
+                        print("lastSeen " + word)
                 elif word not in symbols:
-                    print("Adding " + word)
+                    if debug:
+                        print("Adding " + word)
                     symbols[word] = ""
                     lastSeen = word
                 else:
@@ -136,6 +204,51 @@ for line in assignments:
                 word = ""
 
 print("\n\nassignmentParsing")
-print(symbols)
-for entry in symbols:
-    print("Key: {}\t\tValue: {}".format(entry,symbols[entry]))
+if extra:
+    print(symbols)
+if plain:
+    for entry in symbols:
+        print("Key: {}\n\tValue: {}".format(entry,symbols[entry]))
+
+
+
+
+
+## Condition Parsing
+
+conditionals = ["idle", "have", "afford"]
+lastSeen = None
+word = ""
+
+for line in conditions:
+    if debug:
+        print("line " + line)
+    if len(word) > 0:
+        print("LINE word " + word)
+    word = ""
+    for char in line:
+        if char not in " :\n":
+            word += char
+        elif char == " ":
+            if len(word) > 0:
+                if debug:
+                    print("CHAR word " + word)
+                if word in symbols:
+                    lastSeen = word
+                elif word in conditionals:
+                    pass
+                    #name = symbols[word]
+#                    symbols[]
+
+print("\n\nconditionsParsing")
+if extra:
+    print(symbols)
+"""
+if plain:
+    for entry in symbols:
+        print("Key: {}\n\tValue: {}".format(entry,symbols[entry]))
+        for subentry in entry:
+            print("\t\tSub: {}".format(entry[subentry]))
+"""
+
+
