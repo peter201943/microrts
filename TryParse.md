@@ -6,6 +6,8 @@
  - [TryParse 2](TryParse2.py)   -- 2nd iteration
  - [TryParse 3](TryParse3.py)   -- 3rd iteration
  - [TryParse 4](TryParse4.py)   -- 4th iteration
+ - [TryParse 5](TryParse5.py)   -- 5th iteration
+ - [TryParse 6](TryParse6.py)   -- 6th iteration
 
 
 ### Dataflow
@@ -182,3 +184,43 @@ doBuildBarracks :   have Worker     have Base
  13. `eof` found. Reader Exit.
 
 
+### Lulz
+```scheme
+; Light Rush Rules Based Agent
+
+(doTrainWorker
+( = TrainWorker)
+( : (idle Base)
+    (have Base)
+    (~ (have Worker))
+    (afford Worker)))
+
+(doBuildBase
+( = BuildBase)
+( : (idle Worker)
+    (have Worker)
+    (~ (have Base))
+    (afford Base)))
+
+(doHarvest
+( = Harvest)
+( : (idle Worker)
+    (have Base)))
+
+(doTrainLight
+( = TrainLight)
+( : (idle Barracks)
+    (afford Light)))
+
+(doAttack
+( = Attack)
+( : (idle Light)))
+
+(doBuildBarracks
+( = BuildBarracks)
+( : (have Worker)
+    (have Base)   
+    (~ (have Barracks)) 
+    (afford Barracks)))
+
+```
