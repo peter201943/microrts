@@ -4,17 +4,47 @@
  */
 package ai.peter;
 
+// ****************
+// PETER VARIABLES
+// ****************
+
 import ai.abstraction.AbstractAction;
 import ai.abstraction.AbstractionLayerAI;
 import ai.abstraction.Harvest;
 import ai.abstraction.pathfinding.AStarPathFinding;
-import ai.core.AI;
 import ai.abstraction.pathfinding.PathFinding;
+
+// ***************
+// LIGHTRUSH CORE
+// ***************
+
+import ai.core.AI;
 import ai.core.ParameterSpecification;
+
+// **************
+// PETER FILE IO
+// **************
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+// *********************
+// LIGHTRUSH STRUCTURES
+// *********************
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+
+// *********************
+// LIGHTRUSH STRUCTURES
+// *********************
+
 import rts.GameState;
 import rts.PhysicalGameState;
 import rts.Player;
@@ -22,12 +52,23 @@ import rts.PlayerAction;
 import rts.units.*;
 
 /**
- *
+ * Simple Quick Fix Textfile based simple rulesbased agent
+ * Nothing fancy, just stupid ASAP work
+ * See `src/peter/` for more interesting things
+ * See `TryParse.md` for attempts at parsing
  * @author peter
  */
 public class RulesAgent extends AbstractionLayerAI {
 
 
+
+
+    // ****************
+    // PETER VARIABLES
+    // ****************
+    String rulesName = "SimpleAI.txt";
+    File rulesFile;
+    BufferedReader bufferedReader;
 
 
 
@@ -59,16 +100,31 @@ public class RulesAgent extends AbstractionLayerAI {
     }
 
     public void reset() {
-    	super.reset();
+        super.reset();
     }
     
     public void reset(UnitTypeTable a_utt)  
     {
+        // LIGHTRUSH
         utt = a_utt;
         workerType = utt.getUnitType("Worker");
         baseType = utt.getUnitType("Base");
         barracksType = utt.getUnitType("Barracks");
         lightType = utt.getUnitType("Light");
+
+
+
+
+        // PETER
+        /*
+        this.rulesFile = new File(".", rulesName);
+        try {
+            this.bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(rulesFile)));
+        } catch (FileNotFoundException e) {
+            System.out.println("Peter, you done screwed up again!");
+            e.printStackTrace();
+        }
+        */
     }   
     
     public AI clone() {
@@ -88,52 +144,84 @@ public class RulesAgent extends AbstractionLayerAI {
     // ******************
 
     public PlayerAction getAction(int player, GameState gs) {
+
+        // VARIABLES
         PhysicalGameState pgs = gs.getPhysicalGameState();
         Player p = gs.getPlayer(player);
+        Unit u = new Unit(player, workerType, 0, 0);
+
+        // PETER
+        // this.ReadFile();
 
         // behavior of bases:
-        for (Unit u : pgs.getUnits()) {
-            if (u.getType() == baseType
-                    && u.getPlayer() == player
-                    && gs.getActionAssignment(u) == null) {
-                baseBehavior(u, p, pgs);
-            }
-        }
+        IdleBase(player,u, p, gs, pgs);
 
         // behavior of barracks:
-        for (Unit u : pgs.getUnits()) {
-            if (u.getType() == barracksType
-                    && u.getPlayer() == player
-                    && gs.getActionAssignment(u) == null) {
-                barracksBehavior(u, p, pgs);
-            }
-        }
+        IdleBarracks(player,u,p,gs,pgs);
 
         // behavior of melee units:
-        for (Unit u : pgs.getUnits()) {
-            if (u.getType().canAttack && !u.getType().canHarvest
-                    && u.getPlayer() == player
-                    && gs.getActionAssignment(u) == null) {
-                meleeUnitBehavior(u, p, gs);
-            }
-        }
+        IdleMelee(player,u,p,gs,pgs);
 
         // behavior of workers:
-        List<Unit> workers = new LinkedList<>();
-        for (Unit u : pgs.getUnits()) {
-            if (u.getType().canHarvest
-                    && u.getPlayer() == player) {
-                workers.add(u);
-            }
-        }
-        workersBehavior(workers, p, pgs);
+        IdleWorkers(player,u,p,gs,pgs);
 
-        // This method simply takes all the unit actions executed so far, and packages them into a PlayerAction
+        // FINAL
         return translateActions(player, gs);
     }
 
 
 
+
+
+
+    // *************************
+    // PETER IDLES
+    // *************************
+
+    protected void IdleBase(int player, Unit u, Player p, GameState gs, PhysicalGameState pgs)
+    {
+        for (Unit U : pgs.getUnits()) {
+            if (U.getType() == baseType
+                    && u.getPlayer() == player
+                    && gs.getActionAssignment(U) == null) {
+                baseBehavior(U, p, gs, pgs);
+            }
+        }
+    }
+
+    protected void IdleBarracks(int player, Unit u, Player p, GameState gs, PhysicalGameState pgs)
+    {
+        for (Unit U : pgs.getUnits()) {
+            if (U.getType() == barracksType
+                    && U.getPlayer() == player
+                    && gs.getActionAssignment(U) == null) {
+                barracksBehavior(U, p, gs, pgs);
+            }
+        }
+    }
+
+    protected void IdleMelee(int player, Unit u, Player p, GameState gs, PhysicalGameState pgs)
+    {
+        for (Unit U : pgs.getUnits()) {
+            if (U.getType().canAttack && !U.getType().canHarvest
+                    && U.getPlayer() == player
+                    && gs.getActionAssignment(U) == null) {
+                meleeUnitBehavior(U, p, gs, pgs);
+            }
+        }
+    }
+
+    protected void IdleWorkers(int player, Unit u, Player p, GameState gs, PhysicalGameState pgs)
+    {
+        List<Unit> workers = new LinkedList<>();
+        for (Unit U : pgs.getUnits()) {
+            if (U.getType().canHarvest
+                    && U.getPlayer() == player) {
+                workers.add(U);
+            }
+        }
+        workersBehavior(workers, p, gs, pgs);
+    }
 
 
 
@@ -144,7 +232,33 @@ public class RulesAgent extends AbstractionLayerAI {
     // LIGHT RUSH BASE BEHAVIOR
     // *************************
 
-    public void baseBehavior(Unit u, Player p, PhysicalGameState pgs) {
+    public void baseBehavior(Unit u, Player p, GameState gs, PhysicalGameState pgs) {
+        if (HaveWorker(0,u,p,gs,pgs) && AffordWorker(0,u,p,gs,pgs)) {
+            TrainWorker(0,u,p,gs,pgs);
+        }
+    }
+
+    // *****************************
+    // PETER DO TRAIN WORKER
+    // *****************************
+
+    protected void TrainWorker(int player, Unit u, Player p, GameState gs, PhysicalGameState pgs)
+    {
+        train(u, workerType);
+    }
+
+    protected boolean AffordWorker(int player, Unit u, Player p, GameState gs, PhysicalGameState pgs)
+    {
+        if (p.getResources() >= workerType.cost) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    protected boolean HaveWorker(int player, Unit u, Player p, GameState gs, PhysicalGameState pgs)
+    {
         int nworkers = 0;
         for (Unit u2 : pgs.getUnits()) {
             if (u2.getType() == workerType
@@ -152,10 +266,14 @@ public class RulesAgent extends AbstractionLayerAI {
                 nworkers++;
             }
         }
-        if (nworkers < 1 && p.getResources() >= workerType.cost) {
-            train(u, workerType);
+        if (nworkers < 1) {
+            return true;
+        }
+        else {
+            return false;
         }
     }
+    
 
 
 
@@ -167,11 +285,34 @@ public class RulesAgent extends AbstractionLayerAI {
     // LIGHT RUSH BARRACKS BEHAVIOR
     // *****************************
 
-    public void barracksBehavior(Unit u, Player p, PhysicalGameState pgs) {
-        if (p.getResources() >= lightType.cost) {
-            train(u, lightType);
+    public void barracksBehavior(Unit u, Player p,  GameState gs, PhysicalGameState pgs) {
+        if (AffordLight(0,u,p,gs,pgs)) {
+            TrainLight(0,u,p,gs,pgs);
         }
     }
+
+    // *****************************
+    // PETER DO TRAIN LIGHT
+    // *****************************
+
+    protected boolean AffordLight(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs)
+    {
+        if (p.getResources() >= lightType.cost) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    protected void TrainLight(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs)
+    {
+        train(u, lightType);
+    }
+
+
+
+
 
 
 
@@ -182,8 +323,7 @@ public class RulesAgent extends AbstractionLayerAI {
     // LIGHT RUSH MELEE BEHAVIOR
     // **************************
 
-    public void meleeUnitBehavior(Unit u, Player p, GameState gs) {
-        PhysicalGameState pgs = gs.getPhysicalGameState();
+    public void meleeUnitBehavior(Unit u, Player p, GameState gs, PhysicalGameState pgs) {
         Unit closestEnemy = null;
         int closestDistance = 0;
         for (Unit u2 : pgs.getUnits()) {
@@ -196,7 +336,6 @@ public class RulesAgent extends AbstractionLayerAI {
             }
         }
         if (closestEnemy != null) {
-//            System.out.println("LightRushAI.meleeUnitBehavior: " + u + " attacks " + closestEnemy);
             attack(u, closestEnemy);
         }
     }
@@ -212,7 +351,7 @@ public class RulesAgent extends AbstractionLayerAI {
     // LIGHT RUSH WORKER BEHAVIOR
     // ***************************
 
-    public void workersBehavior(List<Unit> workers, Player p, PhysicalGameState pgs) {
+    public void workersBehavior(List<Unit> workers, Player p,  GameState gs, PhysicalGameState pgs) {
         int nbases = 0;
         int nbarracks = 0;
 
@@ -311,5 +450,96 @@ public class RulesAgent extends AbstractionLayerAI {
 
         return parameters;
     }    
+
+
+
+
+    // *************************
+    // PETER FILE READING
+    // *************************
+
+    // https://stackoverflow.com/questions/3413586/string-to-string-array-conversion-in-java
+    // https://stackoverflow.com/questions/7590838/how-to-find-eof-in-a-string-in-java
+    // https://stackoverflow.com/questions/2564298/java-how-to-initialize-string
+    private void ReadFile()
+    {
+        // Input
+        String inputString = "";
+        String[] inputArray;
+        int count = 0;
+
+        // Parsing
+        String[] symbols = new String[100];
+        String currentSymbol = "";
+
+        // Looping
+        boolean done = false;
+
+        // LOOP
+        while (!done)
+        {
+            // READ
+            try {
+                inputString = UnsafeInput();
+            }
+            catch(IOException error) {
+                System.out.println("PETER READ ERROR");
+                error.printStackTrace();
+            }
+
+            // SPLIT
+            inputArray = inputString.split(" ");
+
+            // PARSE
+            // End of File
+            if (inputString.isEmpty())
+            {
+                done = true;
+            }
+            // Comment
+            else if (inputArray[0].equals("#"))
+            {
+                continue;
+            }
+            // Blank Line
+            else if(inputArray[0].equals("\n"))
+            {
+                continue;
+            }
+            // Assignment
+            else if (inputArray[1].equals(":"))
+            {
+                // Check if new
+                for (String symbol : symbols)
+                {
+                    // Seen
+                    if (symbol.equals(inputArray[0]))
+                    {
+                        currentSymbol = inputArray[0];
+                    }
+                    // Unseen
+                    else
+                    {
+                        symbols[count + 1] = inputArray[0];
+                        count += 1;
+                        currentSymbol = inputArray[0];
+                    }
+                }
+                // Check for each condition (~, idle, have, afford)
+                // ~
+                // idle (ignored, as is implicit)
+                // have
+                // afford
+            }
+            // Unrecognized
+            else
+            {
+                System.out.println("Warning! Unrecognized Input! Invalid Config File! Danger! Warning! Malfunction!\n_FAILS TO UNDERSTAND_");
+            }
+        }
+    }
     
+    public String UnsafeInput() throws IOException {
+		return bufferedReader.readLine();
+	}
 }
