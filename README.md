@@ -100,14 +100,6 @@ $ tree
 ```yaml
 # Light Rush Rules Based Agent
 
-# Creates new rules with these actions
-doTrainWorker   = TrainWorker
-doBuildBase     = BuildBase
-doHarvest       = Harvest
-doTrainLight    = TrainLight
-doAttack        = Attack
-doBuildBarracks = BuildBarracks
-
 # Assigns the above rules these conditions
 doTrainWorker   :   idle Base       have Base     ~ have Worker     afford Worker
 doBuildBase     :   idle Worker     have Worker   ~ have Base       afford Base
@@ -122,10 +114,12 @@ doAttack        :   idle Light
 ### Files
 ```
 .
-└── src
-    └── ai
-        └── peter
-            └── RulesAgent
+├── src
+│   └── ai
+│       └── peter
+│           └── RulesAgent
+:
+└── SimpleAI.txt
 ```
 
 #### Config

@@ -115,7 +115,6 @@ public class RulesAgent extends AbstractionLayerAI {
         lightType = utt.getUnitType("Light");
 
         // PETER
-        /*
         this.rulesFile = new File(rulesName);
         try {
             this.bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(rulesFile)));
@@ -123,7 +122,7 @@ public class RulesAgent extends AbstractionLayerAI {
             System.out.println("Peter, you done screwed up again!");
             e.printStackTrace();
         }
-        */
+        this.ReadFile();
     }   
     
     public AI clone() {
@@ -148,9 +147,6 @@ public class RulesAgent extends AbstractionLayerAI {
         PhysicalGameState pgs = gs.getPhysicalGameState();
         Player p = gs.getPlayer(player);
         defaultUnit = new Unit(player, workerType, 0, 0);
-
-        // PETER
-        // this.ReadFile();
 
         // behavior of bases:
         IdleBase(player,defaultUnit, p, gs, pgs);
