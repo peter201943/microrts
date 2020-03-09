@@ -57,6 +57,7 @@ import rts.units.*;
  * See `src/peter/` for more interesting things
  * See `TryParse.md` for attempts at parsing
  * @author peter
+ * https://stackoverflow.com/questions/7470861/return-multiple-values-from-a-java-method-why-no-n-tuple-objects
  */
 public class RulesAgent extends AbstractionLayerAI {
 
@@ -69,6 +70,7 @@ public class RulesAgent extends AbstractionLayerAI {
     String rulesName = "SimpleAI.txt";
     File rulesFile;
     BufferedReader bufferedReader;
+    Unit defaultUnit;
 
 
 
@@ -112,12 +114,9 @@ public class RulesAgent extends AbstractionLayerAI {
         barracksType = utt.getUnitType("Barracks");
         lightType = utt.getUnitType("Light");
 
-
-
-
         // PETER
         /*
-        this.rulesFile = new File(".", rulesName);
+        this.rulesFile = new File(rulesName);
         try {
             this.bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(rulesFile)));
         } catch (FileNotFoundException e) {
@@ -148,26 +147,28 @@ public class RulesAgent extends AbstractionLayerAI {
         // VARIABLES
         PhysicalGameState pgs = gs.getPhysicalGameState();
         Player p = gs.getPlayer(player);
-        Unit u = new Unit(player, workerType, 0, 0);
+        defaultUnit = new Unit(player, workerType, 0, 0);
 
         // PETER
         // this.ReadFile();
 
         // behavior of bases:
-        IdleBase(player,u, p, gs, pgs);
+        IdleBase(player,defaultUnit, p, gs, pgs);
 
         // behavior of barracks:
-        IdleBarracks(player,u,p,gs,pgs);
+        IdleBarracks(player,defaultUnit,p,gs,pgs);
 
         // behavior of melee units:
-        IdleMelee(player,u,p,gs,pgs);
+        IdleMelee(player,defaultUnit,p,gs,pgs);
 
         // behavior of workers:
-        IdleWorkers(player,u,p,gs,pgs);
+        IdleWorkers(player,defaultUnit,p,gs,pgs);
 
         // FINAL
         return translateActions(player, gs);
     }
+
+
 
 
 
@@ -228,102 +229,24 @@ public class RulesAgent extends AbstractionLayerAI {
 
 
 
+
     // *************************
-    // LIGHT RUSH BASE BEHAVIOR
+    // PETER HAVES
     // *************************
-
-    public void baseBehavior(Unit u, Player p, GameState gs, PhysicalGameState pgs) {
-        if (HaveWorker(0,u,p,gs,pgs) && AffordWorker(0,u,p,gs,pgs)) {
-            TrainWorker(0,u,p,gs,pgs);
-        }
-    }
-
-    // *****************************
-    // PETER DO TRAIN WORKER
-    // *****************************
-
-    protected void TrainWorker(int player, Unit u, Player p, GameState gs, PhysicalGameState pgs)
-    {
-        train(u, workerType);
-    }
-
-    protected boolean AffordWorker(int player, Unit u, Player p, GameState gs, PhysicalGameState pgs)
-    {
-        if (p.getResources() >= workerType.cost) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
 
     protected boolean HaveWorker(int player, Unit u, Player p, GameState gs, PhysicalGameState pgs)
     {
-        int nworkers = 0;
         for (Unit u2 : pgs.getUnits()) {
             if (u2.getType() == workerType
                     && u2.getPlayer() == p.getID()) {
-                nworkers++;
+                return true;
             }
         }
-        if (nworkers < 1) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-    
-
-
-
-
-
-
-
-    // *****************************
-    // LIGHT RUSH BARRACKS BEHAVIOR
-    // *****************************
-
-    public void barracksBehavior(Unit u, Player p,  GameState gs, PhysicalGameState pgs) {
-        if (AffordLight(0,u,p,gs,pgs)) {
-            TrainLight(0,u,p,gs,pgs);
-        }
+        return false;
     }
 
-    // *****************************
-    // PETER DO TRAIN LIGHT
-    // *****************************
-
-    protected boolean AffordLight(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs)
+    protected Unit ClosestEnemy(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs)
     {
-        if (p.getResources() >= lightType.cost) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-
-    protected void TrainLight(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs)
-    {
-        train(u, lightType);
-    }
-
-
-
-
-
-
-
-
-
-
-    // **************************
-    // LIGHT RUSH MELEE BEHAVIOR
-    // **************************
-
-    public void meleeUnitBehavior(Unit u, Player p, GameState gs, PhysicalGameState pgs) {
         Unit closestEnemy = null;
         int closestDistance = 0;
         for (Unit u2 : pgs.getUnits()) {
@@ -335,8 +258,77 @@ public class RulesAgent extends AbstractionLayerAI {
                 }
             }
         }
-        if (closestEnemy != null) {
-            attack(u, closestEnemy);
+        return closestEnemy;
+    }
+
+    protected boolean HaveBase(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs)
+    {
+        for (Unit u2 : pgs.getUnits()) {
+            if (u2.getType() == baseType
+                    && u2.getPlayer() == p.getID()) {
+                return true;
+            }
+        }
+        return false;
+    }    
+    
+    
+    protected boolean HaveBarracks(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs)
+    {
+        for (Unit u2 : pgs.getUnits()) {
+            if (u2.getType() == barracksType
+                    && u2.getPlayer() == p.getID()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+
+
+
+    // *************************
+    // PETER AFFORDS
+    // *************************
+
+    protected boolean AffordWorker(int player, Unit u, Player p, GameState gs, PhysicalGameState pgs)
+    {
+        if (p.getResources() >= workerType.cost) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    protected boolean AffordLight(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs)
+    {
+        if (p.getResources() >= lightType.cost) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    protected boolean AffordBase(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, int resourcesUsed)
+    {
+        if (p.getResources() >= baseType.cost + resourcesUsed) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    protected boolean AffordBarracks(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, int resourcesUsed)
+    {
+        if (p.getResources() >= barracksType.cost + resourcesUsed) {
+            return true;
+        }
+        else {
+            return false;
         }
     }
 
@@ -344,57 +336,30 @@ public class RulesAgent extends AbstractionLayerAI {
 
 
 
+    // *************************
+    // PETER ACTIONS
+    // *************************
 
+    protected void TrainWorker(int player, Unit u, Player p, GameState gs, PhysicalGameState pgs)
+    {
+        train(u, workerType);
+    }
 
+    protected void TrainLight(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs)
+    {
+        train(u, lightType);
+    }
 
-    // ***************************
-    // LIGHT RUSH WORKER BEHAVIOR
-    // ***************************
-
-    public void workersBehavior(List<Unit> workers, Player p,  GameState gs, PhysicalGameState pgs) {
-        int nbases = 0;
-        int nbarracks = 0;
-
-        int resourcesUsed = 0;
-        List<Unit> freeWorkers = new LinkedList<>(workers);
-
-        if (workers.isEmpty()) {
-            return;
+    protected void Attack(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Unit closest)
+    {
+        if (closest != null) {
+            attack(u, closest);
         }
+    }
 
-        for (Unit u2 : pgs.getUnits()) {
-            if (u2.getType() == baseType
-                    && u2.getPlayer() == p.getID()) {
-                nbases++;
-            }
-            if (u2.getType() == barracksType
-                    && u2.getPlayer() == p.getID()) {
-                nbarracks++;
-            }
-        }
-
-        List<Integer> reservedPositions = new LinkedList<>();
-        if (nbases == 0 && !freeWorkers.isEmpty()) {
-            // build a base:
-            if (p.getResources() >= baseType.cost + resourcesUsed) {
-                Unit u = freeWorkers.remove(0);
-                buildIfNotAlreadyBuilding(u,baseType,u.getX(),u.getY(),reservedPositions,p,pgs);
-                resourcesUsed += baseType.cost;
-            }
-        }
-
-        if (nbarracks == 0) {
-            // build a barracks:
-            if (p.getResources() >= barracksType.cost + resourcesUsed && !freeWorkers.isEmpty()) {
-                Unit u = freeWorkers.remove(0);
-                buildIfNotAlreadyBuilding(u,barracksType,u.getX(),u.getY(),reservedPositions,p,pgs);
-                resourcesUsed += barracksType.cost;
-            }
-        }
-
-
-        // harvest with all the free workers:
-        for (Unit u : freeWorkers) {
+    protected Resources Harvest(int player,Unit U, Player p, GameState gs, PhysicalGameState pgs, Resources resources)
+    {
+        for (Unit u : resources.free) {
             Unit closestBase = null;
             Unit closestResource = null;
             int closestDistance = 0;
@@ -427,10 +392,90 @@ public class RulesAgent extends AbstractionLayerAI {
                 }
             }
         }
+        return resources;
+    }
+
+    protected Resources BuildBase(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources resources)
+    {
+        Unit U = resources.free.remove(0);
+        buildIfNotAlreadyBuilding(U,baseType,u.getX(),u.getY(),resources.reserved,p,pgs);
+        resources.used += baseType.cost;
+        return resources;
+    }
+
+    protected Resources BuildBarracks(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources resources)
+    {
+        Unit U = resources.free.remove(0);
+        buildIfNotAlreadyBuilding(U,barracksType,U.getX(),U.getY(),resources.reserved,p,pgs);
+        resources.used += barracksType.cost;
+        return resources;
     }
 
 
 
+
+
+    // *************************
+    // PETER ADDENDUM
+    // *************************
+
+    private static class Resources
+    {
+        int used = 0;
+        List<Unit> free = new LinkedList<>();
+        List<Integer> reserved = new LinkedList<>();
+    }
+
+    protected boolean Negation(boolean truth)
+    {
+        return !truth;
+    }
+
+
+
+
+
+
+
+    // *************************
+    // LIGHT RUSH BEHAVIORS
+    // *************************
+
+    public void baseBehavior(Unit u, Player p, GameState gs, PhysicalGameState pgs) {
+        if (!HaveWorker(0,u,p,gs,pgs) && AffordWorker(0,u,p,gs,pgs)) {
+            TrainWorker(0,u,p,gs,pgs);
+        }
+    }
+
+    public void barracksBehavior(Unit u, Player p,  GameState gs, PhysicalGameState pgs) {
+        if (AffordLight(0,u,p,gs,pgs)) {
+            TrainLight(0,u,p,gs,pgs);
+        }
+    }
+
+    public void meleeUnitBehavior(Unit u, Player p, GameState gs, PhysicalGameState pgs) {
+        Attack(0,u,p,gs,pgs,ClosestEnemy(0,u,p,gs,pgs));
+    }
+    
+    public void workersBehavior(List<Unit> workers, Player p,  GameState gs, PhysicalGameState pgs) {
+        if (HaveWorker(0,defaultUnit,p,gs,pgs)) {
+            Resources resources = new Resources();
+            resources.used = 0;
+            resources.free = new LinkedList<>(workers);
+            resources.reserved = new LinkedList<>();
+            if (!HaveBase(0,defaultUnit,p,gs,pgs)    &&     !resources.free.isEmpty()) {
+                if (AffordBase(0,defaultUnit, p, gs, pgs, resources.used)) {
+                    resources = BuildBase(0, defaultUnit, p, gs, pgs, resources);
+                }
+            }
+            if (!HaveBarracks(0,defaultUnit,p,gs,pgs)) {
+                if (AffordBarracks(0,defaultUnit, p, gs, pgs, resources.used)   &&   !resources.free.isEmpty()) {
+                    resources = BuildBarracks(0, defaultUnit, p, gs, pgs, resources);
+                }
+            }
+            resources = Harvest(0, defaultUnit, p, gs, pgs, resources);
+        }
+    }
 
 
 
@@ -526,10 +571,34 @@ public class RulesAgent extends AbstractionLayerAI {
                     }
                 }
                 // Check for each condition (~, idle, have, afford)
-                // ~
-                // idle (ignored, as is implicit)
-                // have
-                // afford
+                for (int i = 2; i < 100; i++)
+                {
+                    // Empty
+                    if (inputArray[i].isEmpty())
+                    {
+                        break;
+                    }
+                    // ~
+                    else if (inputArray[i].equals("~"))
+                    {
+
+                    }
+                    // idle (ignored, as is implicit)
+                    else if (inputArray[i].equals("idle"))
+                    {
+                        
+                    }
+                    // have
+                    else if (inputArray[i].equals("have"))
+                    {
+                        
+                    }
+                    // afford
+                    if (inputArray[i].equals("afford"))
+                    {
+                        
+                    }
+                }
             }
             // Unrecognized
             else
