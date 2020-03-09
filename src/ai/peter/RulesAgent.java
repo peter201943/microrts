@@ -27,6 +27,14 @@ import rts.units.*;
  */
 public class RulesAgent extends AbstractionLayerAI {
 
+
+
+
+
+
+    // *********************
+    // LIGHT RUSH VARIABLES
+    // *********************
     Random r = new Random();
     protected UnitTypeTable utt;
     UnitType workerType;
@@ -34,16 +42,16 @@ public class RulesAgent extends AbstractionLayerAI {
     UnitType barracksType;
     UnitType lightType;
 
-    // Strategy implemented by this class:
-    // If we have any "light": send it to attack to the nearest enemy unit
-    // If we have a base: train worker until we have 1 workers
-    // If we have a barracks: train light
-    // If we have a worker: do this if needed: build base, build barracks, harvest resources
+
+
+
+    // ********************************
+    // LIGHT RUSH CONSTRUCTORS/HELPERS
+    // ********************************
 
     public RulesAgent(UnitTypeTable a_utt) {
         this(a_utt, new AStarPathFinding());
     }
-    
     
     public RulesAgent(UnitTypeTable a_utt, PathFinding a_pf) {
         super(a_pf);
@@ -63,24 +71,25 @@ public class RulesAgent extends AbstractionLayerAI {
         lightType = utt.getUnitType("Light");
     }   
     
-
     public AI clone() {
         return new RulesAgent(utt, pf);
     }
 
-    /*
-        This is the main function of the AI. It is called at each game cycle with the most up to date game state and
-        returns which actions the AI wants to execute in this cycle.
-        The input parameters are:
-        - player: the player that the AI controls (0 or 1)
-        - gs: the current game state
-        This method returns the actions to be sent to each of the units in the gamestate controlled by the player,
-        packaged as a PlayerAction.
-     */
+
+
+
+
+
+
+
+
+    // ******************
+    // LIGHT RUSH ACTION
+    // ******************
+
     public PlayerAction getAction(int player, GameState gs) {
         PhysicalGameState pgs = gs.getPhysicalGameState();
         Player p = gs.getPlayer(player);
-//        System.out.println("LightRushAI for player " + player + " (cycle " + gs.getTime() + ")");
 
         // behavior of bases:
         for (Unit u : pgs.getUnits()) {
@@ -123,6 +132,18 @@ public class RulesAgent extends AbstractionLayerAI {
         return translateActions(player, gs);
     }
 
+
+
+
+
+
+
+
+
+    // *************************
+    // LIGHT RUSH BASE BEHAVIOR
+    // *************************
+
     public void baseBehavior(Unit u, Player p, PhysicalGameState pgs) {
         int nworkers = 0;
         for (Unit u2 : pgs.getUnits()) {
@@ -136,11 +157,30 @@ public class RulesAgent extends AbstractionLayerAI {
         }
     }
 
+
+
+
+
+
+
+    // *****************************
+    // LIGHT RUSH BARRACKS BEHAVIOR
+    // *****************************
+
     public void barracksBehavior(Unit u, Player p, PhysicalGameState pgs) {
         if (p.getResources() >= lightType.cost) {
             train(u, lightType);
         }
     }
+
+
+
+
+
+
+    // **************************
+    // LIGHT RUSH MELEE BEHAVIOR
+    // **************************
 
     public void meleeUnitBehavior(Unit u, Player p, GameState gs) {
         PhysicalGameState pgs = gs.getPhysicalGameState();
@@ -160,6 +200,17 @@ public class RulesAgent extends AbstractionLayerAI {
             attack(u, closestEnemy);
         }
     }
+
+
+
+
+
+
+
+
+    // ***************************
+    // LIGHT RUSH WORKER BEHAVIOR
+    // ***************************
 
     public void workersBehavior(List<Unit> workers, Player p, PhysicalGameState pgs) {
         int nbases = 0;
@@ -239,6 +290,17 @@ public class RulesAgent extends AbstractionLayerAI {
         }
     }
 
+
+
+
+
+
+
+
+
+    // **********************
+    // LIGHT RUSH PARAMETERS
+    // **********************
     
     @Override
     public List<ParameterSpecification> getParameters()
