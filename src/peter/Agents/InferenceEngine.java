@@ -1,6 +1,7 @@
 
-package peter;
+package peter.Agents;
 
+import peter.Rules.*;
 import rts.GameState;
 import rts.PlayerAction;
 
@@ -34,11 +35,11 @@ public class InferenceEngine
 
         // Generate the PlayerAction
         playerAction = new PlayerAction();
-        for (Rule rule : rulesBase.Status())
+        for (Rule rule : rulesBase.Rules())
         {
             if (rule.Status())
             {
-                playerAction.merge(rule.Action().Evaluate());
+                //playerAction.merge(rule.Action().Evaluate());
             }
         }
 

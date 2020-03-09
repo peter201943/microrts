@@ -1,6 +1,9 @@
 
-package peter;
+package peter.Rules;
 
+import java.util.ArrayList;
+import peter.Facts.*;
+import rts.GameState;
 import rts.PlayerAction;
 
 /**
@@ -13,7 +16,6 @@ public class Rule
                                         // not a new layer of state (and potentially bugs).
     private boolean status;              // Last updated state
     private ArrayList<Fact> conditions; // What needs to happen for the rule to activate
-    private Action action;
     
     /**
      * All rules need a name
@@ -23,7 +25,7 @@ public class Rule
         this.name = name;
         this.status = false;
         this.conditions = new ArrayList<Fact>();
-        this.action = new Action();
+        //this.action = new Action();
     }
 
     public String Name()
@@ -38,13 +40,15 @@ public class Rule
 
     public void Add(Fact fact)
     {
-        this.conditions.Add(fact);
+        this.conditions.add(fact);
     }
 
+    /*
     public void Set(Action action)
     {
-        this.action = action;
+        //this.action = action;
     }
+    */
 
     /**
      * Each rule needs to implement its own arbitrary update checks on a knowledgeBase
@@ -56,22 +60,25 @@ public class Rule
             fact.Update(gameState);
             if (!fact.Status())
             {
-                self.status = false;
+                this.status = false;
                 return false;
             }
         }
-        self.status = true;
+        this.status = true;
         return true;
     }
 
+    
     /**
      * Each rules has a corresponding action to perform when true.
      * Each rules needs to specify what this is.
      */
+    /*
     public Action Action()
     {
         return this.action;
     }
+    */
 
     /**
      * For diagnostics, returns name and last updated state

@@ -1,5 +1,5 @@
 
-package peter;
+package peter.Facts;
 
 import rts.GameState;
 
@@ -12,6 +12,7 @@ public abstract class Fact
     private boolean status;     // Is the fact valid?
     private int age;            // How long has this fact been true?
     private int time;           // When was the fact last update?
+    private boolean state;
     
     /**
      * All facts need a name

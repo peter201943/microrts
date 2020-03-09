@@ -1,7 +1,9 @@
 
-package peter;
+package peter.Rules;
 
 import java.util.ArrayList;
+
+import rts.GameState;
 
 /**
  * Knowledge Base Holds, Updates, and Access Facts.
@@ -67,7 +69,7 @@ public class RulesBase
      */
     public void Add(Rule rule)
     {
-        rules.Add(rule);
+        rules.add(rule);
     }
 
     /**
@@ -75,15 +77,28 @@ public class RulesBase
      */
     public void Remove(Rule rule)
     {
-        rules.Remove(rule);
+        for (Rule aRule : this.rules)
+        {
+            if (aRule.Name().equals(rule.Name()))
+            {
+                this.rules.remove(aRule);
+            }
+        }
     }
 
     /**
      *  Find a Rule given its instance
      */
-    public void Get(Rule rule)
+    public Rule Get(Rule rule)
     {
-        rules.Get(rule);
+        for (Rule aRule : this.rules)
+        {
+            if (aRule.Name().equals(rule.Name()))
+            {
+                return aRule;
+            }
+        }
+        return new Rule("empty");
     }
 
     /**
@@ -100,6 +115,11 @@ public class RulesBase
                 return rule;
             }
         }
-        return new Rule();
+        return new Rule("empty");
+    }
+
+    public ArrayList<Rule> Rules()
+    {
+        return this.rules;
     }
 }

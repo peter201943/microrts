@@ -4,9 +4,12 @@ package peter.Agents;
 // File Imports
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
+import ai.abstraction.AbstractAction;
 // RTS Imports
 import ai.abstraction.AbstractionLayerAI;
+import ai.abstraction.Harvest;
 import ai.abstraction.LightRush;
 import ai.abstraction.pathfinding.AStarPathFinding;
 import ai.core.AI;
@@ -21,12 +24,15 @@ import rts.PhysicalGameState;
 import rts.Player;
 import rts.PlayerAction;
 import rts.units.*;
+import java.io.IOException;					// Handle any input errors
+import java.io.BufferedReader;				// For Getting User Commands
+import java.io.FileInputStream;				// Read a File
+import java.io.FileNotFoundException;
 
-public class RulesBasedAgent extends AbstractionLayerAI
-{
+public class RulesBasedAgent extends AbstractionLayerAI {
     // Rule Based System Variables
     private InferenceEngine inferenceEngine;
-    //private RuleParser ruleParser;
+    // private RuleParser ruleParser;
 
     // RTS System Variables
     Random r = new Random();
@@ -36,11 +42,16 @@ public class RulesBasedAgent extends AbstractionLayerAI
     UnitType barracksType;
     UnitType lightType;
 
+    // File Variables
+    String fileName = "config.properties";
+    BufferedReader bufferedReader;
+    File configFile;
+
     // 1st Call
     public RulesBasedAgent(UnitTypeTable a_utt) {
         this(a_utt, new AStarPathFinding());
     }
-    
+
     // 2nd Call
     public RulesBasedAgent(UnitTypeTable a_utt, PathFinding a_pf) {
         super(a_pf);
@@ -50,15 +61,22 @@ public class RulesBasedAgent extends AbstractionLayerAI
     // 3rd Call
     public void reset() {
         super.reset();
-        
+
         this.inferenceEngine = new InferenceEngine();
-        //this.ruleParser = new RuleParser();
+        // this.ruleParser = new RuleParser();
         this.BuildParser();
     }
-    
+
     // 3rd Call
-    public void reset(UnitTypeTable a_utt)  
-    {
+    public void reset(UnitTypeTable a_utt) {
+        configFile = new File(fileName);
+        try {
+            bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(configFile)));
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
         this.utt = a_utt;
         this.workerType = utt.getUnitType("Worker");
         this.baseType = utt.getUnitType("Base");
@@ -134,10 +152,6 @@ public class RulesBasedAgent extends AbstractionLayerAI
     // 5th Call
     private void BuildInference() throws IOException 
     {
-        // Load File
-        File file = new File("SimpleAI.txt");
-        String fileContents = file.readAllLines();
-
         // Load Inference
         //this.ruleParser.Parse(fileContents, this.inferenceEngine);
     }
@@ -150,8 +164,21 @@ public class RulesBasedAgent extends AbstractionLayerAI
     // **************************
 
     public AI clone() {
-        return new LightRush(utt, pf);
+        return new RulesBasedAgent(utt, pf);
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * This is the main function of the AI. It is called at each game cycle with the most up to date game state and
@@ -207,9 +234,197 @@ public class RulesBasedAgent extends AbstractionLayerAI
         return translateActions(player, gs);
     }
 
+
+
+    /**
+     * REPLACE ME REPLACE ME REPLACE ME REPLACE ME REPLACE ME
+     */
+    public void baseBehavior(Unit u, Player p, PhysicalGameState pgs) {
+        int nworkers = 0;
+        for (Unit u2 : pgs.getUnits()) {
+            if (u2.getType() == workerType
+                    && u2.getPlayer() == p.getID()) {
+                nworkers++;
+            }
+        }
+        if (nworkers < 1 && p.getResources() >= workerType.cost) {
+            train(u, workerType);
+        }
+    }
+
+
+    /**
+     * REPLACE ME REPLACE ME REPLACE ME REPLACE ME REPLACE ME
+     */
+    public void barracksBehavior(Unit u, Player p, PhysicalGameState pgs) {
+        if (p.getResources() >= lightType.cost) {
+            train(u, lightType);
+        }
+    }
+
+
+
+
+
+
+    /**
+     * REPLACE ME REPLACE ME REPLACE ME REPLACE ME REPLACE ME
+     */
+    public void meleeUnitBehavior(Unit u, Player p, GameState gs) {
+        PhysicalGameState pgs = gs.getPhysicalGameState();
+        Unit closestEnemy = null;
+        int closestDistance = 0;
+        for (Unit u2 : pgs.getUnits()) {
+            if (u2.getPlayer() >= 0 && u2.getPlayer() != p.getID()) {
+                int d = Math.abs(u2.getX() - u.getX()) + Math.abs(u2.getY() - u.getY());
+                if (closestEnemy == null || d < closestDistance) {
+                    closestEnemy = u2;
+                    closestDistance = d;
+                }
+            }
+        }
+        if (closestEnemy != null) {
+//            System.out.println("LightRushAI.meleeUnitBehavior: " + u + " attacks " + closestEnemy);
+            attack(u, closestEnemy);
+        }
+    }
+
+
+
+
+    /**
+     * REPLACE ME REPLACE ME REPLACE ME REPLACE ME REPLACE ME
+     */
+    public void workersBehavior(List<Unit> workers, Player p, PhysicalGameState pgs) {
+        int nbases = 0;
+        int nbarracks = 0;
+
+        int resourcesUsed = 0;
+        List<Unit> freeWorkers = new LinkedList<>(workers);
+
+        if (workers.isEmpty()) {
+            return;
+        }
+
+        for (Unit u2 : pgs.getUnits()) {
+            if (u2.getType() == baseType
+                    && u2.getPlayer() == p.getID()) {
+                nbases++;
+            }
+            if (u2.getType() == barracksType
+                    && u2.getPlayer() == p.getID()) {
+                nbarracks++;
+            }
+        }
+
+        List<Integer> reservedPositions = new LinkedList<>();
+        if (nbases == 0 && !freeWorkers.isEmpty()) {
+            // build a base:
+            if (p.getResources() >= baseType.cost + resourcesUsed) {
+                Unit u = freeWorkers.remove(0);
+                buildIfNotAlreadyBuilding(u,baseType,u.getX(),u.getY(),reservedPositions,p,pgs);
+                resourcesUsed += baseType.cost;
+            }
+        }
+
+        if (nbarracks == 0) {
+            // build a barracks:
+            if (p.getResources() >= barracksType.cost + resourcesUsed && !freeWorkers.isEmpty()) {
+                Unit u = freeWorkers.remove(0);
+                buildIfNotAlreadyBuilding(u,barracksType,u.getX(),u.getY(),reservedPositions,p,pgs);
+                resourcesUsed += barracksType.cost;
+            }
+        }
+
+
+        // harvest with all the free workers:
+        for (Unit u : freeWorkers) {
+            Unit closestBase = null;
+            Unit closestResource = null;
+            int closestDistance = 0;
+            for (Unit u2 : pgs.getUnits()) {
+                if (u2.getType().isResource) {
+                    int d = Math.abs(u2.getX() - u.getX()) + Math.abs(u2.getY() - u.getY());
+                    if (closestResource == null || d < closestDistance) {
+                        closestResource = u2;
+                        closestDistance = d;
+                    }
+                }
+            }
+            closestDistance = 0;
+            for (Unit u2 : pgs.getUnits()) {
+                if (u2.getType().isStockpile && u2.getPlayer()==p.getID()) {
+                    int d = Math.abs(u2.getX() - u.getX()) + Math.abs(u2.getY() - u.getY());
+                    if (closestBase == null || d < closestDistance) {
+                        closestBase = u2;
+                        closestDistance = d;
+                    }
+                }
+            }
+            if (closestResource != null && closestBase != null) {
+                AbstractAction aa = getAbstractAction(u);
+                if (aa instanceof Harvest) {
+                    Harvest h_aa = (Harvest)aa;
+                    if (h_aa.getTarget() != closestResource || h_aa.getBase()!=closestBase) harvest(u, closestResource, closestBase);
+                } else {
+                    harvest(u, closestResource, closestBase);
+                }
+            }
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Huh?
+     */
     @Override
     public List<ParameterSpecification> getParameters() {
-        // TODO Auto-generated method stub
-        return null;
+        List<ParameterSpecification> parameters = new ArrayList<>();
+        
+        parameters.add(new ParameterSpecification("PathFinding", PathFinding.class, new AStarPathFinding()));
+
+        return parameters;
     }
+
+    /**
+     * Returns a LINE of input from the file
+     */
+	public String Input() {
+		
+		// Get The Input
+        String inputString = "";
+		
+		// Errors?
+		try {
+            inputString = UnsafeInput();
+        }
+        catch(IOException error) {
+            error.printStackTrace();
+        }
+		
+		// Return
+		return inputString;
+	}
+		
+	public String UnsafeInput() throws IOException {
+		return bufferedReader.readLine();
+	}
 }

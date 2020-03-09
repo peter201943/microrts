@@ -119,6 +119,7 @@ see
 .
 └── resources
     └── config.properties
+        └── AI2=peter.RulesBasedAgent
 ```
 
 ### Addendum
