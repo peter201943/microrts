@@ -1,11 +1,13 @@
 
-package peter;
+package peter.Agents;
 
 // File Imports
 import java.io.File;
 import java.io.IOException;
 
 // RTS Imports
+import ai.abstraction.AbstractionLayerAI;
+import ai.abstraction.LightRush;
 import ai.abstraction.pathfinding.AStarPathFinding;
 import ai.core.AI;
 import ai.abstraction.pathfinding.PathFinding;
@@ -24,7 +26,7 @@ public class RulesBasedAgent extends AbstractionLayerAI
 {
     // Rule Based System Variables
     private InferenceEngine inferenceEngine;
-    private RuleParser ruleParser;
+    //private RuleParser ruleParser;
 
     // RTS System Variables
     Random r = new Random();
@@ -50,7 +52,7 @@ public class RulesBasedAgent extends AbstractionLayerAI
         super.reset();
         
         this.inferenceEngine = new InferenceEngine();
-        this.ruleParser = new RuleParser();
+        //this.ruleParser = new RuleParser();
         this.BuildParser();
     }
     
@@ -64,13 +66,14 @@ public class RulesBasedAgent extends AbstractionLayerAI
         this.lightType = utt.getUnitType("Light");
 
         this.inferenceEngine = new InferenceEngine();
-        this.ruleParser = new RuleParser();
+        //this.ruleParser = new RuleParser();
         this.BuildParser();
     }   
 
     // 4th Call
     private void BuildParser()
     {
+        /*
         // Instantiate Words
         Afford      afford      = new Afford(ruleParser);
         Barracks    barracks    = new Barracks(ruleParser);
@@ -125,6 +128,7 @@ public class RulesBasedAgent extends AbstractionLayerAI
         this.ruleParser.AddCharRule(rightParen);
         this.ruleParser.AddCharRule(space);
         this.ruleParser.AddCharRule(squiggle);
+        */
     }
 
     // 5th Call
@@ -135,7 +139,7 @@ public class RulesBasedAgent extends AbstractionLayerAI
         String fileContents = file.readAllLines();
 
         // Load Inference
-        this.ruleParser.Parse(fileContents, this.inferenceEngine);
+        //this.ruleParser.Parse(fileContents, this.inferenceEngine);
     }
 
 
@@ -201,5 +205,11 @@ public class RulesBasedAgent extends AbstractionLayerAI
 
         // This method simply takes all the unit actions executed so far, and packages them into a PlayerAction
         return translateActions(player, gs);
+    }
+
+    @Override
+    public List<ParameterSpecification> getParameters() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

@@ -112,6 +112,15 @@ doTrainLight    :   idle Barracks   afford Light
 doAttack        :   idle Light
 ```
 
+
+### Running
+see
+```
+.
+└── resources
+    └── config.properties
+```
+
 ### Addendum
  - See [Notes](Notes.md) for design choices and why this format was selected.
 
