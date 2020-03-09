@@ -34,7 +34,12 @@
 ---------
 
 
-## Files
+## Files (Outdated)
+ignore this. This is no longer true.  
+Ran out of time to implement this.  
+You can however see the pitiful attempts with `TryParse1-6.py`.  
+The bulk of the work is now done from within a single file (`src.ai.peter.RulesAgent.java`).  
+Most of this was deleted, but can still be seen in `src/peter`.  
 ```
 Standard Access@SHODAN /cygdrive/c/Users/Standard Access/Peter/School/College/3 - Junior/CS 387/Projects/HW 4
 $ tree
@@ -114,16 +119,33 @@ doAttack        :   idle Light
 
 
 ### Running
+### Files
+```
+.
+└── src
+    └── ai
+        └── peter
+            └── RulesAgent
+```
+
 #### Config
 ```
 .
 └── resources
     └── config.properties
-        └── AI2=peter.RulesBasedAgent
+```
+```
+AI2=ai.peter.RulesAgent
 ```
 #### Execution
 ```
-
+.
+└── src
+    └── rts
+        └── MicroRTS
+```
+```
+javac MicroRTS.java
 ```
 
 ### Addendum
