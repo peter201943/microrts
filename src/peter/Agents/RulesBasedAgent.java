@@ -31,7 +31,7 @@ import java.io.FileNotFoundException;
 
 public class RulesBasedAgent extends AbstractionLayerAI {
     // Rule Based System Variables
-    private InferenceEngine inferenceEngine;
+    //private InferenceEngine inferenceEngine;
     // private RuleParser ruleParser;
 
     // RTS System Variables
@@ -62,9 +62,9 @@ public class RulesBasedAgent extends AbstractionLayerAI {
     public void reset() {
         super.reset();
 
-        this.inferenceEngine = new InferenceEngine();
+        //this.inferenceEngine = new InferenceEngine();
         // this.ruleParser = new RuleParser();
-        this.BuildParser();
+        //this.BuildParser();
     }
 
     // 3rd Call
@@ -83,15 +83,15 @@ public class RulesBasedAgent extends AbstractionLayerAI {
         this.barracksType = utt.getUnitType("Barracks");
         this.lightType = utt.getUnitType("Light");
 
-        this.inferenceEngine = new InferenceEngine();
+        //this.inferenceEngine = new InferenceEngine();
         //this.ruleParser = new RuleParser();
-        this.BuildParser();
+        //this.BuildParser();
     }   
 
+    /*
     // 4th Call
     private void BuildParser()
     {
-        /*
         // Instantiate Words
         Afford      afford      = new Afford(ruleParser);
         Barracks    barracks    = new Barracks(ruleParser);
@@ -146,15 +146,17 @@ public class RulesBasedAgent extends AbstractionLayerAI {
         this.ruleParser.AddCharRule(rightParen);
         this.ruleParser.AddCharRule(space);
         this.ruleParser.AddCharRule(squiggle);
-        */
     }
+    */
 
+    /*
     // 5th Call
     private void BuildInference() throws IOException 
     {
         // Load Inference
         //this.ruleParser.Parse(fileContents, this.inferenceEngine);
     }
+    */
 
 
 

@@ -114,12 +114,16 @@ doAttack        :   idle Light
 
 
 ### Running
-see
+#### Config
 ```
 .
 └── resources
     └── config.properties
         └── AI2=peter.RulesBasedAgent
+```
+#### Execution
+```
+
 ```
 
 ### Addendum
