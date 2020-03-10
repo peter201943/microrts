@@ -101,12 +101,12 @@ $ tree
 # Light Rush Rules Based Agent
 
 # Assigns the above rules these conditions
-doTrainWorker   :   idle Base       have Base     ~ have Worker     afford Worker
-doBuildBase     :   idle Worker     have Worker   ~ have Base       afford Base
-doBuildBarracks :   have Worker     have Base     ~ have Barracks   afford Barracks
-doHarvest       :   idle Worker     have Base
-doTrainLight    :   idle Barracks   afford Light
-doAttack        :   idle Light
+doTrainWorker   :   is Base         idle Base     ~ have Worker     afford Worker
+doBuildBase     :   is Worker       idle Worker   ~ have Base       afford Base
+doBuildBarracks :   is Worker       have Base     ~ have Barracks   afford Barracks
+doHarvest       :   is Worker       idle Worker     have Base
+doTrainLight    :   is Barracks     idle Barracks   afford Light
+doAttack        :   is Light        idle Light
 ```
 
 

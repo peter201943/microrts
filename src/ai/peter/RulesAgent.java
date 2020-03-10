@@ -39,7 +39,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 
 // *********************
 // LIGHTRUSH STRUCTURES
@@ -61,24 +60,9 @@ import rts.units.*;
  */
 public class RulesAgent extends AbstractionLayerAI {
 
-
-
-
-    // ****************
-    // PETER VARIABLES
-    // ****************
     String rulesName = "SimpleAI.txt";
     File rulesFile;
     BufferedReader bufferedReader;
-    Unit defaultUnit;
-
-
-
-
-    // *********************
-    // LIGHT RUSH VARIABLES
-    // *********************
-    Random r = new Random();
     protected UnitTypeTable utt;
     UnitType workerType;
     UnitType baseType;
@@ -104,15 +88,29 @@ public class RulesAgent extends AbstractionLayerAI {
     public void reset() {
         super.reset();
     }
+
+    public AI clone() {
+        return new RulesAgent(utt, pf);
+    }
+
+    @Override
+    public List<ParameterSpecification> getParameters()
+    {
+        List<ParameterSpecification> parameters = new ArrayList<>();
+        
+        parameters.add(new ParameterSpecification("PathFinding", PathFinding.class, new AStarPathFinding()));
+
+        return parameters;
+    }
     
     public void reset(UnitTypeTable a_utt)  
     {
         // LIGHTRUSH
         utt = a_utt;
-        workerType = utt.getUnitType("Worker");
-        baseType = utt.getUnitType("Base");
-        barracksType = utt.getUnitType("Barracks");
-        lightType = utt.getUnitType("Light");
+        workerType      = utt.getUnitType("Worker");
+        baseType        = utt.getUnitType("Base");
+        barracksType    = utt.getUnitType("Barracks");
+        lightType       = utt.getUnitType("Light");
 
         // PETER
         this.rulesFile = new File(rulesName);
@@ -124,10 +122,6 @@ public class RulesAgent extends AbstractionLayerAI {
         }
         this.ReadFile();
     }   
-    
-    public AI clone() {
-        return new RulesAgent(utt, pf);
-    }
 
 
 
@@ -143,83 +137,28 @@ public class RulesAgent extends AbstractionLayerAI {
 
     public PlayerAction getAction(int player, GameState gs) {
 
-        // VARIABLES
         PhysicalGameState pgs = gs.getPhysicalGameState();
         Player p = gs.getPlayer(player);
-        defaultUnit = new Unit(player, workerType, 0, 0);
+        Resources r = new Resources();
 
-        // behavior of bases:
-        IdleBase(player,defaultUnit, p, gs, pgs);
+        for (Unit u : gs.getUnits())
+        {
+            if(u.getPlayer() == player)
+            {
+                DoTrainWorker(player,u,p,gs,pgs,r);
+    
+                DoBuildBarracks(player,u,p,gs,pgs,r);
+            
+                DoHarvest(player,u,p,gs,pgs,r);
+            
+                DoTrainLight(player,u,p,gs,pgs,r);
+            
+                DoAttack(player,u,p,gs,pgs,r);
+            }
+        }
 
-        // behavior of barracks:
-        IdleBarracks(player,defaultUnit,p,gs,pgs);
-
-        // behavior of melee units:
-        IdleMelee(player,defaultUnit,p,gs,pgs);
-
-        // behavior of workers:
-        IdleWorkers(player,defaultUnit,p,gs,pgs);
-
-        // FINAL
         return translateActions(player, gs);
     }
-
-
-
-
-
-
-
-
-    // *************************
-    // PETER IDLES
-    // *************************
-
-    protected void IdleBase(int player, Unit u, Player p, GameState gs, PhysicalGameState pgs)
-    {
-        for (Unit U : pgs.getUnits()) {
-            if (U.getType() == baseType
-                    && u.getPlayer() == player
-                    && gs.getActionAssignment(U) == null) {
-                baseBehavior(U, p, gs, pgs);
-            }
-        }
-    }
-
-    protected void IdleBarracks(int player, Unit u, Player p, GameState gs, PhysicalGameState pgs)
-    {
-        for (Unit U : pgs.getUnits()) {
-            if (U.getType() == barracksType
-                    && U.getPlayer() == player
-                    && gs.getActionAssignment(U) == null) {
-                barracksBehavior(U, p, gs, pgs);
-            }
-        }
-    }
-
-    protected void IdleMelee(int player, Unit u, Player p, GameState gs, PhysicalGameState pgs)
-    {
-        for (Unit U : pgs.getUnits()) {
-            if (U.getType().canAttack && !U.getType().canHarvest
-                    && U.getPlayer() == player
-                    && gs.getActionAssignment(U) == null) {
-                meleeUnitBehavior(U, p, gs, pgs);
-            }
-        }
-    }
-
-    protected void IdleWorkers(int player, Unit u, Player p, GameState gs, PhysicalGameState pgs)
-    {
-        List<Unit> workers = new LinkedList<>();
-        for (Unit U : pgs.getUnits()) {
-            if (U.getType().canHarvest
-                    && U.getPlayer() == player) {
-                workers.add(U);
-            }
-        }
-        workersBehavior(workers, p, gs, pgs);
-    }
-
 
 
 
@@ -230,7 +169,7 @@ public class RulesAgent extends AbstractionLayerAI {
     // PETER HAVES
     // *************************
 
-    protected boolean HaveWorker(int player, Unit u, Player p, GameState gs, PhysicalGameState pgs)
+    protected boolean HaveWorker(int player, Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources r)
     {
         for (Unit u2 : pgs.getUnits()) {
             if (u2.getType() == workerType
@@ -241,7 +180,7 @@ public class RulesAgent extends AbstractionLayerAI {
         return false;
     }
 
-    protected Unit ClosestEnemy(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs)
+    protected Unit ClosestEnemy(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources r)
     {
         Unit closestEnemy = null;
         int closestDistance = 0;
@@ -257,7 +196,7 @@ public class RulesAgent extends AbstractionLayerAI {
         return closestEnemy;
     }
 
-    protected boolean HaveBase(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs)
+    protected boolean HaveBase(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources r)
     {
         for (Unit u2 : pgs.getUnits()) {
             if (u2.getType() == baseType
@@ -269,7 +208,7 @@ public class RulesAgent extends AbstractionLayerAI {
     }    
     
     
-    protected boolean HaveBarracks(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs)
+    protected boolean HaveBarracks(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources r)
     {
         for (Unit u2 : pgs.getUnits()) {
             if (u2.getType() == barracksType
@@ -288,7 +227,7 @@ public class RulesAgent extends AbstractionLayerAI {
     // PETER AFFORDS
     // *************************
 
-    protected boolean AffordWorker(int player, Unit u, Player p, GameState gs, PhysicalGameState pgs)
+    protected boolean AffordWorker(int player, Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources r)
     {
         if (p.getResources() >= workerType.cost) {
             return true;
@@ -298,7 +237,7 @@ public class RulesAgent extends AbstractionLayerAI {
         }
     }
 
-    protected boolean AffordLight(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs)
+    protected boolean AffordLight(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources r)
     {
         if (p.getResources() >= lightType.cost) {
             return true;
@@ -308,9 +247,9 @@ public class RulesAgent extends AbstractionLayerAI {
         }
     }
 
-    protected boolean AffordBase(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, int resourcesUsed)
+    protected boolean AffordBase(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources r)
     {
-        if (p.getResources() >= baseType.cost + resourcesUsed) {
+        if (p.getResources() >= baseType.cost + r.used) {
             return true;
         }
         else {
@@ -318,9 +257,9 @@ public class RulesAgent extends AbstractionLayerAI {
         }
     }
 
-    protected boolean AffordBarracks(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, int resourcesUsed)
+    protected boolean AffordBarracks(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources r)
     {
-        if (p.getResources() >= barracksType.cost + resourcesUsed) {
+        if (p.getResources() >= barracksType.cost + r.used) {
             return true;
         }
         else {
@@ -336,161 +275,232 @@ public class RulesAgent extends AbstractionLayerAI {
     // PETER ACTIONS
     // *************************
 
-    protected void TrainWorker(int player, Unit u, Player p, GameState gs, PhysicalGameState pgs)
+    protected void TrainWorker(int player, Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources r)
     {
         train(u, workerType);
+        r.busy.add(u);
     }
 
-    protected void TrainLight(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs)
+    protected void TrainLight(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources r)
     {
         train(u, lightType);
+        r.busy.add(u);
     }
 
-    protected void Attack(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Unit closest)
+    protected void Attack(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Unit closest, Resources r)
     {
         if (closest != null) {
             attack(u, closest);
+            r.busy.add(u);
         }
     }
 
-    protected Resources Harvest(int player,Unit U, Player p, GameState gs, PhysicalGameState pgs, Resources resources)
+    protected void Harvest(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources r)
     {
-        for (Unit u : resources.free) {
-            Unit closestBase = null;
-            Unit closestResource = null;
-            int closestDistance = 0;
-            for (Unit u2 : pgs.getUnits()) {
-                if (u2.getType().isResource) {
-                    int d = Math.abs(u2.getX() - u.getX()) + Math.abs(u2.getY() - u.getY());
-                    if (closestResource == null || d < closestDistance) {
-                        closestResource = u2;
-                        closestDistance = d;
-                    }
-                }
-            }
-            closestDistance = 0;
-            for (Unit u2 : pgs.getUnits()) {
-                if (u2.getType().isStockpile && u2.getPlayer()==p.getID()) {
-                    int d = Math.abs(u2.getX() - u.getX()) + Math.abs(u2.getY() - u.getY());
-                    if (closestBase == null || d < closestDistance) {
-                        closestBase = u2;
-                        closestDistance = d;
-                    }
-                }
-            }
-            if (closestResource != null && closestBase != null) {
-                AbstractAction aa = getAbstractAction(u);
-                if (aa instanceof Harvest) {
-                    Harvest h_aa = (Harvest)aa;
-                    if (h_aa.getTarget() != closestResource || h_aa.getBase()!=closestBase) harvest(u, closestResource, closestBase);
-                } else {
-                    harvest(u, closestResource, closestBase);
+        Unit closestBase = null;
+        Unit closestResource = null;
+        int closestDistance = 0;
+        
+        // Find nearest Resources
+        for (Unit u2 : pgs.getUnits()) {
+            if (u2.getType().isResource) {
+                int d = Math.abs(u2.getX() - u.getX()) + Math.abs(u2.getY() - u.getY());
+                if (closestResource == null || d < closestDistance) {
+                    closestResource = u2;
+                    closestDistance = d;
                 }
             }
         }
-        return resources;
+
+        // Reset Distance
+        closestDistance = 0;
+
+        // Find nearest Base
+        for (Unit u2 : pgs.getUnits()) {
+            if (u2.getType().isStockpile && u2.getPlayer()==p.getID()) {
+                int d = Math.abs(u2.getX() - u.getX()) + Math.abs(u2.getY() - u.getY());
+                if (closestBase == null || d < closestDistance) {
+                    closestBase = u2;
+                    closestDistance = d;
+                }
+            }
+        }
+
+        // Harvest
+        if (closestResource != null && closestBase != null) {
+            AbstractAction aa = getAbstractAction(u);
+            if (aa instanceof Harvest) {
+                Harvest h_aa = (Harvest)aa;
+                if (h_aa.getTarget() != closestResource || h_aa.getBase()!=closestBase) harvest(u, closestResource, closestBase);
+            } else {
+                harvest(u, closestResource, closestBase);
+                r.busy.add(u);
+            }
+        }
     }
 
-    protected Resources BuildBase(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources resources)
+    protected void BuildBase(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources r)
     {
-        Unit U = resources.free.remove(0);
-        buildIfNotAlreadyBuilding(U,baseType,u.getX(),u.getY(),resources.reserved,p,pgs);
-        resources.used += baseType.cost;
-        return resources;
+        buildIfNotAlreadyBuilding(u,baseType,u.getX(),u.getY(),r.reserved,p,pgs);
+        r.busy.add(u);
     }
 
-    protected Resources BuildBarracks(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources resources)
+    protected void BuildBarracks(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources r)
     {
-        Unit U = resources.free.remove(0);
-        buildIfNotAlreadyBuilding(U,barracksType,U.getX(),U.getY(),resources.reserved,p,pgs);
-        resources.used += barracksType.cost;
-        return resources;
+        buildIfNotAlreadyBuilding(u,barracksType,u.getX(),u.getY(),r.reserved,p,pgs);
+        r.busy.add(u);
     }
+
 
 
 
 
 
     // *************************
-    // PETER ADDENDUM
+    // PETER STATICS
     // *************************
+
+    protected void DoTrainWorker(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources r)
+    {
+        if (Base(player,u,p,gs,pgs,r) && Idle(player,u,p,gs,pgs,r) && Not(HaveWorker(player,u,p,gs,pgs,r)) && AffordWorker(player,u,p,gs,pgs,r))
+        {
+            TrainWorker(player, u, p, gs, pgs,r);
+        }
+    }
+
+    protected void DoBuildBase(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources r)
+    {
+        if (Worker(player,u,p,gs,pgs,r) && Idle(player,u,p,gs,pgs,r) && Not(HaveBase(player,u,p,gs,pgs,r)) && AffordBase(player,u,p,gs,pgs,r))
+        {
+            BuildBase(player, u, p, gs, pgs, r);
+        }
+    }
+
+    protected void DoBuildBarracks(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources r)
+    {
+        if (Worker(player,u,p,gs,pgs,r) && Not(HaveBarracks(player,u,p,gs,pgs,r)) && HaveBase(player,u,p,gs,pgs,r) && AffordBarracks(player,u,p,gs,pgs,r))
+        {
+            BuildBarracks(player, u, p, gs, pgs,r);
+        }
+    }
+
+    protected void DoHarvest(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources r)
+    {
+        if (Worker(player,u,p,gs,pgs,r) && Idle(player,u,p,gs,pgs,r))
+        {
+            Harvest(player,u,p,gs,pgs,r);
+        }
+    }
+
+    protected void DoTrainLight(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources r)
+    {
+        if (Barracks(player,u,p,gs,pgs,r) && Idle(player,u,p,gs,pgs,r) && AffordLight(player,u,p,gs,pgs,r))
+        {
+            TrainLight(player, u, p, gs, pgs,r);
+        }
+    }
+
+    protected void DoAttack(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources r)
+    {
+        if (Light(player,u,p,gs,pgs,r) && Idle(player,u,p,gs,pgs,r))
+        {
+            Attack(0,u,p,gs,pgs,ClosestEnemy(0,u,p,gs,pgs,r),r);
+        }
+    }
+
+
+
+
+
+
+
+
+    // **********************
+    // PETER NEW
+    // **********************
+    
+    protected boolean Idle(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources r)
+    {
+        if (!r.busy.contains(u)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    protected boolean Base(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources r)
+    {
+        if (u.getType() == baseType)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    protected boolean Worker(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources r)
+    {
+        if (u.getType().canHarvest)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    protected boolean Barracks(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources r)
+    {
+        if (u.getType() == barracksType)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    protected boolean Light(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources r)
+    {
+        if (u.getType().canAttack && !u.getType().canHarvest)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    protected boolean Afford(int player,Unit u, Player p, GameState gs, PhysicalGameState pgs, Resources r)
+    {
+        if (p.getResources() >= u.getType().cost)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
     private static class Resources
     {
         int used = 0;
         List<Unit> free = new LinkedList<>();
         List<Integer> reserved = new LinkedList<>();
+        List<Unit> busy = new LinkedList<>();
     }
 
-    protected boolean Negation(boolean truth)
+    protected boolean Not(boolean truth)
     {
         return !truth;
     }
-
-
-
-
-
-
-
-    // *************************
-    // LIGHT RUSH BEHAVIORS
-    // *************************
-
-    public void baseBehavior(Unit u, Player p, GameState gs, PhysicalGameState pgs) {
-        if (!HaveWorker(0,u,p,gs,pgs) && AffordWorker(0,u,p,gs,pgs)) {
-            TrainWorker(0,u,p,gs,pgs);
-        }
-    }
-
-    public void barracksBehavior(Unit u, Player p,  GameState gs, PhysicalGameState pgs) {
-        if (AffordLight(0,u,p,gs,pgs)) {
-            TrainLight(0,u,p,gs,pgs);
-        }
-    }
-
-    public void meleeUnitBehavior(Unit u, Player p, GameState gs, PhysicalGameState pgs) {
-        Attack(0,u,p,gs,pgs,ClosestEnemy(0,u,p,gs,pgs));
-    }
-    
-    public void workersBehavior(List<Unit> workers, Player p,  GameState gs, PhysicalGameState pgs) {
-        if (HaveWorker(0,defaultUnit,p,gs,pgs)) {
-            Resources resources = new Resources();
-            resources.used = 0;
-            resources.free = new LinkedList<>(workers);
-            resources.reserved = new LinkedList<>();
-            if (!HaveBase(0,defaultUnit,p,gs,pgs)    &&     !resources.free.isEmpty()) {
-                if (AffordBase(0,defaultUnit, p, gs, pgs, resources.used)) {
-                    resources = BuildBase(0, defaultUnit, p, gs, pgs, resources);
-                }
-            }
-            if (!HaveBarracks(0,defaultUnit,p,gs,pgs)) {
-                if (AffordBarracks(0,defaultUnit, p, gs, pgs, resources.used)   &&   !resources.free.isEmpty()) {
-                    resources = BuildBarracks(0, defaultUnit, p, gs, pgs, resources);
-                }
-            }
-            resources = Harvest(0, defaultUnit, p, gs, pgs, resources);
-        }
-    }
-
-
-
-
-
-
-    // **********************
-    // LIGHT RUSH PARAMETERS
-    // **********************
-    
-    @Override
-    public List<ParameterSpecification> getParameters()
-    {
-        List<ParameterSpecification> parameters = new ArrayList<>();
-        
-        parameters.add(new ParameterSpecification("PathFinding", PathFinding.class, new AStarPathFinding()));
-
-        return parameters;
-    }    
 
 
 
@@ -586,6 +596,11 @@ public class RulesAgent extends AbstractionLayerAI {
                     }
                     // have
                     else if (inputArray[i].equals("have"))
+                    {
+                        
+                    }
+                    // is
+                    else if (inputArray[i].equals("is"))
                     {
                         
                     }
